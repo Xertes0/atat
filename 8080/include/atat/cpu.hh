@@ -9,23 +9,21 @@
 namespace atat
 {
 
-struct condition_codes
+struct flags
 {
-	uint8_t z:1;  // zero
-	uint8_t s:1;  // sign
-	uint8_t p:1;  // parity
-	uint8_t cy:1; // carry
-	uint8_t ac:1; // auxillary carry
+	uint8_t z:1; // zero
+	uint8_t s:1; // sign
+	uint8_t p:1; // parity
+	uint8_t c:1; // carry
+	//uint8_t a:1; // auxillary carry
 	//uint8_t pad:3;
 
-	[[nodiscard]]
 	constexpr
-	condition_codes() noexcept :
-		z{0},
-		s{0},
-		p{0},
-		cy{0},
-		ac{0} {}
+	flags();
+
+	constexpr
+	void
+	set_from(uint16_t val);
 };
 
 struct registers
@@ -38,16 +36,8 @@ struct registers
 	uint8_t h;
 	uint8_t l;
 
-	[[nodiscard]]
 	constexpr
-	registers() noexcept :
-		a{0},
-		b{0},
-		c{0},
-		d{0},
-		e{0},
-		h{0},
-		l{0} {}
+	registers();
 };
 
 class cpu
@@ -60,35 +50,14 @@ class cpu
 
 	std::vector<uint8_t> memory_;
 
-	condition_codes cc_;
+	flags flags_;
 	uint8_t int_enable_;
 
 public:
-	[[nodiscard]]
-	cpu(std::vector<uint8_t>&& memory) noexcept :
-		regs_{},
-		sp_{},
-		pc_{},
-		memory_{memory},
-		cc_{},
-		int_enable_{} {}
+	cpu(std::vector<uint8_t>&& memory);
 
-	constexpr
 	void
-	step()
-	{
-		uint8_t op = memory_[pc_];
-
-		switch(op)
-		{
-			default: {
-				throw unimplemented_instruction_exception{op};
-				break;
-			}
-			case opcodes::nop: { break; }
-		}
-		++pc_;
-	}
+	step();
 };
 
 } // namespace atat
