@@ -36,6 +36,13 @@ registers::registers() :
     h{0},
     l{0} {}
 
+constexpr
+uint16_t
+registers::hl() const
+{
+    return (static_cast<uint16_t>(h) << 8) | static_cast<uint16_t>(l);
+}
+
 cpu::cpu(std::vector<uint8_t>&& memory) :
     regs_{},
     sp_{},
@@ -73,8 +80,7 @@ cpu::step()
         case ADD_REG(l)
         case opcodes::add_m:
         {
-            uint16_t addr = (static_cast<uint16_t>(regs_.h) << 8) | static_cast<uint16_t>(regs_.l);
-            uint16_t val = static_cast<uint16_t>(regs_.a) + static_cast<uint16_t>(memory_[addr]);
+            uint16_t val = static_cast<uint16_t>(regs_.a) + static_cast<uint16_t>(memory_[regs_.hl()]);
             flags_.set_from(val);
             regs_.a = static_cast<uint8_t>(val);
             break;

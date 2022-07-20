@@ -37,6 +37,10 @@ struct registers
 	uint8_t l;
 
 	constexpr
+	uint16_t
+	hl() const;
+
+	constexpr
 	registers();
 };
 
