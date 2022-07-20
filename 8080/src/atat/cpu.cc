@@ -22,8 +22,14 @@ flags::set_from(uint16_t val)
 {
     z = (val == 0)?1:0;
     s = ((val & 0b1000000) == 1)?1:0;
-    p = (((val & 0xff) % 2) == 0)?1:0;
     c = (val > std::numeric_limits<uint8_t>::max())?1:0;
+
+    // works?
+    uint8_t count{0};
+    for(uint8_t i=0;i<8;i++) {
+        count += ((val & (1 << i)) > 0)?1:0;
+    }
+    p = (count%2)?1:0;
 }
 
 constexpr
