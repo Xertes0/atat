@@ -51,10 +51,10 @@ cpu::cpu(std::vector<uint8_t>&& memory) :
     flags_{},
     int_enable_{} {}
 
-#define ADD_REG(REG) \
+#define REG_ARI(REG, OP) \
     opcodes::add_##REG: \
     { \
-        uint16_t val = static_cast<uint16_t>(regs_.a) + static_cast<uint16_t>(regs_.REG); \
+        uint16_t val = static_cast<uint16_t>(regs_.a) OP static_cast<uint16_t>(regs_.REG); \
         flags_.set_from(val); \
         regs_.a = static_cast<uint8_t>(val); \
         break; \
@@ -72,12 +72,13 @@ cpu::step()
             break;
         }
         case opcodes::nop: break;
-        case ADD_REG(b)
-        case ADD_REG(c)
-        case ADD_REG(d)
-        case ADD_REG(e)
-        case ADD_REG(h)
-        case ADD_REG(l)
+        case REG_ARI(a, +)
+        case REG_ARI(b, +)
+        case REG_ARI(c, +)
+        case REG_ARI(d, +)
+        case REG_ARI(e, +)
+        case REG_ARI(h, +)
+        case REG_ARI(l, +)
         case opcodes::add_m:
         {
             uint16_t val = static_cast<uint16_t>(regs_.a) + static_cast<uint16_t>(memory_[regs_.hl()]);
@@ -85,7 +86,6 @@ cpu::step()
             regs_.a = static_cast<uint8_t>(val);
             break;
         }
-        case ADD_REG(a)
         case opcodes::adi_d8:
         {
             uint16_t val = static_cast<uint16_t>(regs_.a) + static_cast<uint16_t>(*(op+1));
