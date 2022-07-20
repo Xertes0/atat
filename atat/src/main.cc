@@ -4,8 +4,8 @@
 #include <fstream>
 #include <vector>
 
-#include "atat/disassembler.hh"
-#include "atat/cpu.hh"
+#include <atat/disassembler.hh>
+#include <atat/cpu.hh>
 
 int main(int argc, char const** argv)
 {
