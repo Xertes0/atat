@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED 20)
 
 option(UNIT_TESTS "Enable unit tests" OFF)
+option(DOXYGEN "Enable doxygen docs" ON)
 
 if(UNIT_TESTS)
     include(FetchContent)
@@ -15,6 +16,10 @@ if(UNIT_TESTS)
         GIT_TAG release-1.12.1
     )
     FetchContent_MakeAvailable(googletest)
+endif()
+
+if(DOXYGEN)
+    find_package(Doxygen REQUIRED)
 endif()
 
 add_subdirectory(libatat)

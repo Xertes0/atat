@@ -1,5 +1,11 @@
 #pragma once
 
+/**
+ * @file opcodes.hh
+ *
+ * Containes the cpu's opcodes.
+ */
+
 #include <cstdint>
 
 namespace atat

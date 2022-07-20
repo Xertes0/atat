@@ -11,3 +11,13 @@ target_link_libraries(atat)
 if(UNIT_TESTS)
     add_subdirectory(tests)
 endif()
+
+if(DOXYGEN)
+    set(DOXYGEN_JAVADOC_AUTOBRIEF YES)
+    doxygen_add_docs(
+        atat-docs
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ALL
+    )
+endif()
