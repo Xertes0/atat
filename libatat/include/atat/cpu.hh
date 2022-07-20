@@ -23,7 +23,7 @@ struct flags
 
 	constexpr
 	void
-	set_from(uint16_t val);
+	set_all(uint16_t val);
 };
 
 struct registers

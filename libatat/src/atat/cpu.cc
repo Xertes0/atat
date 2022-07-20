@@ -18,13 +18,12 @@ flags::flags() :
 
 constexpr
 void
-flags::set_from(uint16_t val)
+flags::set_all(uint16_t val)
 {
     z = (val == 0)?1:0;
     s = ((val & 0b1000000) == 1)?1:0;
     c = (val > std::numeric_limits<uint8_t>::max())?1:0;
 
-    // works?
     uint8_t count{0};
     for(uint8_t i=0;i<8;i++) {
         count += ((val & (1 << i)) > 0)?1:0;
@@ -57,11 +56,20 @@ cpu::cpu(std::vector<uint8_t>&& memory) :
     flags_{},
     int_enable_{} {}
 
-#define REG_ARI(REG, OP) \
-    opcodes::add_##REG: \
+#define REG_ARI(NAME,REG, OP) \
+    opcodes::NAME##_##REG: \
     { \
         uint16_t val = static_cast<uint16_t>(regs_.a) OP static_cast<uint16_t>(regs_.REG); \
-        flags_.set_from(val); \
+        flags_.set_all(val); \
+        regs_.a = static_cast<uint8_t>(val); \
+        break; \
+    }
+
+#define REG_ARI_MEM(NAME, OP) \
+    opcodes::NAME##_m: \
+    { \
+        uint16_t val = static_cast<uint16_t>(regs_.a) OP static_cast<uint16_t>(memory_[regs_.hl()]); \
+        flags_.set_all(val); \
         regs_.a = static_cast<uint8_t>(val); \
         break; \
     }
@@ -77,25 +85,23 @@ cpu::step()
             throw unimplemented_instruction_exception{*op};
             break;
         }
+        // NOP
         case opcodes::nop: break;
-        case REG_ARI(a, +)
-        case REG_ARI(b, +)
-        case REG_ARI(c, +)
-        case REG_ARI(d, +)
-        case REG_ARI(e, +)
-        case REG_ARI(h, +)
-        case REG_ARI(l, +)
-        case opcodes::add_m:
-        {
-            uint16_t val = static_cast<uint16_t>(regs_.a) + static_cast<uint16_t>(memory_[regs_.hl()]);
-            flags_.set_from(val);
-            regs_.a = static_cast<uint8_t>(val);
-            break;
-        }
+
+        // Arithmetic
+        case REG_ARI(add, a, +)
+        case REG_ARI(add, b, +)
+        case REG_ARI(add, c, +)
+        case REG_ARI(add, d, +)
+        case REG_ARI(add, e, +)
+        case REG_ARI(add, h, +)
+        case REG_ARI(add, l, +)
+        case REG_ARI_MEM(add, +)
+
         case opcodes::adi_d8:
         {
             uint16_t val = static_cast<uint16_t>(regs_.a) + static_cast<uint16_t>(*(op+1));
-            flags_.set_from(val);
+            flags_.set_all(val);
             regs_.a = static_cast<uint8_t>(val);
             ++pc_;
             break;
