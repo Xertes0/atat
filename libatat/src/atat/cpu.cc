@@ -29,7 +29,7 @@ flags::set_from(uint16_t val)
     for(uint8_t i=0;i<8;i++) {
         count += ((val & (1 << i)) > 0)?1:0;
     }
-    p = (count%2)?1:0;
+    p = (count%2 == 0)?1:0;
 }
 
 constexpr
