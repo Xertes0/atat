@@ -7,3 +7,7 @@ target_sources(atat PRIVATE ${SOURCES})
 target_include_directories(atat PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 target_link_libraries(atat)
+
+if(UNIT_TESTS)
+    add_subdirectory(tests)
+endif()

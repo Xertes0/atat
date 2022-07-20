@@ -19,7 +19,3 @@ endif()
 
 add_subdirectory(libatat)
 add_subdirectory(atat)
-
-if(UNIT_TESTS)
-    add_subdirectory(testatat)
-endif()
