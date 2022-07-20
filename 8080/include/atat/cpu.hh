@@ -11,11 +11,11 @@ namespace atat
 
 struct condition_codes
 {
-	uint8_t z:1;
-	uint8_t s:1;
-	uint8_t p:1;
-	uint8_t cy:1;
-	uint8_t ac:1;
+	uint8_t z:1;  // zero
+	uint8_t s:1;  // sign
+	uint8_t p:1;  // parity
+	uint8_t cy:1; // carry
+	uint8_t ac:1; // auxillary carry
 	//uint8_t pad:3;
 
 	[[nodiscard]]
@@ -85,8 +85,9 @@ public:
 				throw unimplemented_instruction_exception{op};
 				break;
 			}
-			case opcodes::nop: { ++pc_; break; }
+			case opcodes::nop: { break; }
 		}
+		++pc_;
 	}
 };
 
