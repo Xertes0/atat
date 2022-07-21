@@ -114,6 +114,20 @@ cpu::cpu(std::vector<uint8_t>&& memory) :
         break; \
     }
 
+#define REG_CMP(REG) \
+    opcodes::cmp_##REG: \
+    { \
+        flags_.set_zspc(regs_.a - regs_.REG); \
+        break; \
+    }
+
+#define REG_CMP_MEM() \
+    opcodes::cmp_m: \
+    { \
+        flags_.set_zspc(static_cast<uint16_t>(regs_.a) - static_cast<uint16_t>(regs_.hl())); \
+        break; \
+    }
+
 void
 cpu::step()
 {
@@ -164,6 +178,15 @@ cpu::step()
         case REG_ONE(dcr, h, -)
         case REG_ONE(dcr, l, -)
         case REG_ONE_MEM(dcr, -)
+
+        case REG_CMP(a)
+        case REG_CMP(b)
+        case REG_CMP(c)
+        case REG_CMP(d)
+        case REG_CMP(e)
+        case REG_CMP(h)
+        case REG_CMP(l)
+        case REG_CMP_MEM()
 
         case opcodes::adi_d8:
         {
