@@ -51,7 +51,6 @@ struct flags
 	 * Constructor.
 	 * Zero initializes the data members.
 	 */
-	constexpr
 	flags();
 
 	/**
@@ -59,7 +58,6 @@ struct flags
 	 * 
 	 * @param val Instruction result
 	 */
-	constexpr
 	void
 	set_zspc(uint16_t val);
 
@@ -68,7 +66,6 @@ struct flags
 	 * 
 	 * @param val Instruction result
 	 */
-	constexpr
 	void
 	set_zsp(uint16_t val);
 };
@@ -92,7 +89,6 @@ struct registers
 	 * Format: h = 0xAB l = 0xCD hl = 0xABCD
 	 * @return constexpr uint16_t 
 	 */
-	constexpr
 	uint16_t
 	hl() const;
 
@@ -102,7 +98,6 @@ struct registers
 	 *
 	 * @param val Value
 	 */
-	constexpr
 	void
 	set_hl(uint16_t val);
 
@@ -110,7 +105,6 @@ struct registers
 	 * Constructor.
 	 * Zero initializes the data members.
 	 */
-	constexpr
 	registers();
 };
 
@@ -119,12 +113,13 @@ struct registers
  */
 class cpu
 {
+private:
 	registers regs_; ///< Registers
 
 	uint16_t sp_; ///< Stact pointer
 	uint16_t pc_; ///< Program counter
 
-	std::vector<uint8_t> memory_; ///< Cpu memory
+	uint8_t* memory_; ///< Cpu memory
 
 	flags flags_; ///< Cpu flags
 	uint8_t int_enable_; ///< Enable interrupts
@@ -133,9 +128,9 @@ public:
 	/**
 	 * Constructor
 	 * 
-	 * @param memory Initialized cpu memory
+	 * @param memory Pointer to cpu memory
 	 */
-	cpu(std::vector<uint8_t>&& memory);
+	cpu(uint8_t* memory);
 
 	/**
 	 * Step cpu by a single instruction.

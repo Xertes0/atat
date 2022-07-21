@@ -8,7 +8,6 @@
 namespace atat
 {
 
-constexpr
 flags::flags() :
     z{0},
     s{0},
@@ -16,7 +15,6 @@ flags::flags() :
     c{0}/*,
     a{0}*/ {}
 
-constexpr
 void
 flags::set_zspc(uint16_t val)
 {
@@ -31,7 +29,6 @@ flags::set_zspc(uint16_t val)
     p = (count%2 == 0)?1:0;
 }
 
-constexpr
 void
 flags::set_zsp(uint16_t val)
 {
@@ -45,7 +42,6 @@ flags::set_zsp(uint16_t val)
     p = (count%2 == 0)?1:0;
 }
 
-constexpr
 registers::registers() :
     a{0},
     b{0},
@@ -55,14 +51,12 @@ registers::registers() :
     h{0},
     l{0} {}
 
-constexpr
 uint16_t
 registers::hl() const
 {
     return (static_cast<uint16_t>(h) << 8) | static_cast<uint16_t>(l);
 }
 
-constexpr
 void
 registers::set_hl(uint16_t val)
 {
@@ -70,7 +64,7 @@ registers::set_hl(uint16_t val)
     l = static_cast<uint8_t>(val);
 }
 
-cpu::cpu(std::vector<uint8_t>&& memory) :
+cpu::cpu(uint8_t* memory) :
     regs_{},
     sp_{},
     pc_{},
@@ -108,23 +102,23 @@ cpu::cpu(std::vector<uint8_t>&& memory) :
 #define REG_ONE_MEM(NAME, OP) \
     opcodes::NAME##_m: \
     { \
-        uint16_t val = static_cast<uint16_t>(regs_.hl()) OP 1; \
+        uint16_t val = static_cast<uint16_t>(memory_[regs_.hl()]) OP 1; \
         flags_.set_zsp(val); \
-        regs_.set_hl(val); \
+        memory_[regs_.hl()] OP##= 1; \
         break; \
     }
 
 #define REG_CMP(REG) \
     opcodes::cmp_##REG: \
     { \
-        flags_.set_zspc(regs_.a - regs_.REG); \
+        flags_.set_zspc(static_cast<uint16_t>(regs_.a) - static_cast<uint16_t>(regs_.REG)); \
         break; \
     }
 
 #define REG_CMP_MEM() \
     opcodes::cmp_m: \
     { \
-        flags_.set_zspc(static_cast<uint16_t>(regs_.a) - static_cast<uint16_t>(regs_.hl())); \
+        flags_.set_zspc(static_cast<uint16_t>(regs_.a) - static_cast<uint16_t>(memory_[regs_.hl()])); \
         break; \
     }
 
@@ -140,7 +134,7 @@ cpu::cpu(std::vector<uint8_t>&& memory) :
 #define REG_LOG_MEM(NAME, OP) \
     opcodes::NAME##_m: \
     { \
-        uint16_t val = static_cast<uint16_t>(regs_.a) OP regs_.hl(); \
+        uint16_t val = static_cast<uint16_t>(regs_.a) OP static_cast<uint16_t>(memory_[regs_.hl()]); \
         flags_.set_zspc(val); \
         regs_.a = static_cast<uint8_t>(val); \
         break; \
@@ -149,7 +143,7 @@ cpu::cpu(std::vector<uint8_t>&& memory) :
 void
 cpu::step()
 {
-    uint8_t* op = &memory_[pc_];
+    uint8_t const* op = memory_ + pc_;
 
     switch(*op)
     {
