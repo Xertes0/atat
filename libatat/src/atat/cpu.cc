@@ -62,7 +62,6 @@ registers::hl() const
     return (static_cast<uint16_t>(h) << 8) | static_cast<uint16_t>(l);
 }
 
-// TODO Unit tests
 constexpr
 void
 registers::set_hl(uint16_t val)
