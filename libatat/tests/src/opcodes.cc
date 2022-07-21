@@ -281,3 +281,177 @@ TEST(OpcodesTest, ArithmeticCMP)
     cpu.step();
     EXPECT_EQ(cpu.flags_.z, 1);
 }
+
+TEST(OpcodesTest, ArithmeticANA)
+{
+    uint8_t memory[] = {
+        atat::opcodes::ana_a,
+        atat::opcodes::ana_b,
+        atat::opcodes::ana_c,
+        atat::opcodes::ana_d,
+        atat::opcodes::ana_e,
+        atat::opcodes::ana_h,
+        atat::opcodes::ana_l,
+        atat::opcodes::ana_m,
+        0
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.regs_.a = 20;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 20);
+
+    cpu.regs_.a = 14;
+    cpu.regs_.b = 20;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 14 & 20);
+
+    cpu.regs_.a = 81;
+    cpu.regs_.c = 43;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 81 & 43);
+
+    cpu.regs_.a = 34;
+    cpu.regs_.d = 90;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 34 & 90);
+
+    cpu.regs_.a = 77;
+    cpu.regs_.e = 23;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 77 & 23);
+
+    cpu.regs_.a = 10;
+    cpu.regs_.h = 83;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 10 & 83);
+
+    cpu.regs_.a = 4;
+    cpu.regs_.l = 2;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 4 & 2);
+
+    memory[8]   = 0b0011;
+    cpu.regs_.a = 0b1001;
+    cpu.regs_.h = 0;
+    cpu.regs_.l = 8;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 1);
+}
+
+TEST(OpcodesTest, ArithmeticORA)
+{
+    uint8_t memory[] = {
+        atat::opcodes::ora_a,
+        atat::opcodes::ora_b,
+        atat::opcodes::ora_c,
+        atat::opcodes::ora_d,
+        atat::opcodes::ora_e,
+        atat::opcodes::ora_h,
+        atat::opcodes::ora_l,
+        atat::opcodes::ora_m,
+        0
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.regs_.a = 20;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 20);
+
+    cpu.regs_.a = 14;
+    cpu.regs_.b = 20;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 14 | 20);
+
+    cpu.regs_.a = 81;
+    cpu.regs_.c = 43;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 81 | 43);
+
+    cpu.regs_.a = 34;
+    cpu.regs_.d = 90;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 34 | 90);
+
+    cpu.regs_.a = 77;
+    cpu.regs_.e = 23;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 77 | 23);
+
+    cpu.regs_.a = 10;
+    cpu.regs_.h = 83;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 10 | 83);
+
+    cpu.regs_.a = 4;
+    cpu.regs_.l = 2;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 4 | 2);
+
+    memory[8]   = 0b0011;
+    cpu.regs_.a = 0b1001;
+    cpu.regs_.h = 0;
+    cpu.regs_.l = 8;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 0b1011);
+}
+
+TEST(OpcodesTest, ArithmeticXRA)
+{
+    uint8_t memory[] = {
+        atat::opcodes::xra_a,
+        atat::opcodes::xra_b,
+        atat::opcodes::xra_c,
+        atat::opcodes::xra_d,
+        atat::opcodes::xra_e,
+        atat::opcodes::xra_h,
+        atat::opcodes::xra_l,
+        atat::opcodes::xra_m,
+        0
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.regs_.a = 20;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 0);
+
+    cpu.regs_.a = 14;
+    cpu.regs_.b = 20;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 14 ^ 20);
+
+    cpu.regs_.a = 81;
+    cpu.regs_.c = 43;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 81 ^ 43);
+
+    cpu.regs_.a = 34;
+    cpu.regs_.d = 90;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 34 ^ 90);
+
+    cpu.regs_.a = 77;
+    cpu.regs_.e = 23;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 77 ^ 23);
+
+    cpu.regs_.a = 10;
+    cpu.regs_.h = 83;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 10 ^ 83);
+
+    cpu.regs_.a = 4;
+    cpu.regs_.l = 2;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 4 ^ 2);
+
+    memory[8]   = 0b0011;
+    cpu.regs_.a = 0b1001;
+    cpu.regs_.h = 0;
+    cpu.regs_.l = 8;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 0b1010);
+}
