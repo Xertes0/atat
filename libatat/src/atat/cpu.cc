@@ -128,6 +128,24 @@ cpu::cpu(std::vector<uint8_t>&& memory) :
         break; \
     }
 
+#define REG_LOG(NAME, REG, OP) \
+    opcodes::NAME##_##REG: \
+    { \
+        uint16_t val = static_cast<uint16_t>(regs_.a) OP static_cast<uint16_t>(regs_.REG); \
+        flags_.set_zspc(val); \
+        regs_.a = static_cast<uint8_t>(val); \
+        break; \
+    }
+
+#define REG_LOG_MEM(NAME, OP) \
+    opcodes::NAME##_m: \
+    { \
+        uint16_t val = static_cast<uint16_t>(regs_.a) OP regs_.hl(); \
+        flags_.set_zspc(val); \
+        regs_.a = static_cast<uint8_t>(val); \
+        break; \
+    }
+
 void
 cpu::step()
 {
@@ -187,6 +205,33 @@ cpu::step()
         case REG_CMP(h)
         case REG_CMP(l)
         case REG_CMP_MEM()
+
+        case REG_LOG(ana, a, &)
+        case REG_LOG(ana, b, &)
+        case REG_LOG(ana, c, &)
+        case REG_LOG(ana, d, &)
+        case REG_LOG(ana, e, &)
+        case REG_LOG(ana, h, &)
+        case REG_LOG(ana, l, &)
+        case REG_LOG_MEM(ana, &)
+
+        case REG_LOG(ora, a, |)
+        case REG_LOG(ora, b, |)
+        case REG_LOG(ora, c, |)
+        case REG_LOG(ora, d, |)
+        case REG_LOG(ora, e, |)
+        case REG_LOG(ora, h, |)
+        case REG_LOG(ora, l, |)
+        case REG_LOG_MEM(ora, |)
+
+        case REG_LOG(xra, a, ^)
+        case REG_LOG(xra, b, ^)
+        case REG_LOG(xra, c, ^)
+        case REG_LOG(xra, d, ^)
+        case REG_LOG(xra, e, ^)
+        case REG_LOG(xra, h, ^)
+        case REG_LOG(xra, l, ^)
+        case REG_LOG_MEM(xra, ^)
 
         case opcodes::adi_d8:
         {
