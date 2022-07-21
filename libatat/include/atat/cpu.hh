@@ -55,13 +55,22 @@ struct flags
 	flags();
 
 	/**
-	 * Sets all flags based on the value.
+	 * Sets z,s,p,c flags based on the value.
 	 * 
 	 * @param val Instruction result
 	 */
 	constexpr
 	void
-	set_all(uint16_t val);
+	set_zspc(uint16_t val);
+
+	/**
+	 * Sets z,s,p flags based on the value.
+	 * 
+	 * @param val Instruction result
+	 */
+	constexpr
+	void
+	set_zsp(uint16_t val);
 };
 
 
@@ -86,6 +95,16 @@ struct registers
 	constexpr
 	uint16_t
 	hl() const;
+
+	/**
+	 * Sets hl registers to value
+	 * Format: hl = 0xABCD h = 0xAB l = 0xCD
+	 *
+	 * @param val Value
+	 */
+	constexpr
+	void
+	set_hl(uint16_t val);
 
 	/**
 	 * Constructor.
