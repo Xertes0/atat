@@ -42,6 +42,12 @@ flags::set_zsp(uint16_t val)
     p = (count%2 == 0)?1:0;
 }
 
+void
+flags::set_c(uint16_t val)
+{
+    c = (val > std::numeric_limits<uint8_t>::max())?1:0;
+}
+
 registers::registers() :
     a{0},
     b{0},
@@ -52,9 +58,35 @@ registers::registers() :
     l{0} {}
 
 uint16_t
+registers::bc() const
+{
+    return (static_cast<uint16_t>(b) << 8) | static_cast<uint16_t>(c);
+}
+
+uint16_t
+registers::de() const
+{
+    return (static_cast<uint16_t>(d) << 8) | static_cast<uint16_t>(e);
+}
+
+uint16_t
 registers::hl() const
 {
     return (static_cast<uint16_t>(h) << 8) | static_cast<uint16_t>(l);
+}
+
+void
+registers::set_bc(uint16_t val)
+{
+    b = static_cast<uint8_t>(val >> 8);
+    c = static_cast<uint8_t>(val);
+}
+
+void
+registers::set_de(uint16_t val)
+{
+    d = static_cast<uint8_t>(val >> 8);
+    e = static_cast<uint8_t>(val);
 }
 
 void
@@ -331,6 +363,62 @@ cpu::step()
             flags_.set_zspc(val);
             regs_.a = static_cast<uint8_t>(val);
             ++pc_;
+            break;
+        }
+
+        case opcodes::dad_b:
+        {
+            uint16_t val = regs_.hl() + regs_.bc();
+            flags_.set_c(val);
+            regs_.set_hl(val);
+            break;
+        }
+
+        case opcodes::dad_d:
+        {
+            uint16_t val = regs_.hl() + regs_.de();
+            flags_.set_c(val);
+            regs_.set_hl(val);
+            break;
+        }
+
+        case opcodes::dad_h:
+        {
+            uint16_t val = regs_.hl() + regs_.hl();
+            flags_.set_c(val);
+            regs_.set_hl(val);
+            break;
+        }
+
+        case opcodes::dad_sp:
+        {
+            uint16_t val = regs_.hl() + sp_;
+            flags_.set_c(val);
+            regs_.set_hl(val);
+            break;
+        }
+
+        case opcodes::inx_b:
+        {
+            regs_.set_bc(regs_.bc() + 1);
+            break;
+        }
+
+        case opcodes::inx_d:
+        {
+            regs_.set_de(regs_.de() + 1);
+            break;
+        }
+
+        case opcodes::inx_h:
+        {
+            regs_.set_hl(regs_.hl() + 1);
+            break;
+        }
+
+        case opcodes::inx_sp:
+        {
+            sp_ = sp_ + 1;
             break;
         }
 

@@ -855,3 +855,78 @@ TEST(OpcodesTest, ArithmeticSBI)
     cpu.step();
     EXPECT_EQ(cpu.regs_.a, 9);
 }
+
+TEST(OpcodesTest, ArithmeticDAD)
+{
+    uint8_t memory[] = {
+        atat::opcodes::dad_b,
+        atat::opcodes::dad_d,
+        atat::opcodes::dad_h,
+        atat::opcodes::dad_sp,
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.regs_.h = 0b00000011;
+    cpu.regs_.l = 0b11111111;
+    cpu.regs_.b = 0b00000000;
+    cpu.regs_.c = 0b00000001;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.h, 0b00000100);
+    EXPECT_EQ(cpu.regs_.l, 0);
+
+    cpu.regs_.h = 0b00000011;
+    cpu.regs_.l = 0b11011111;
+    cpu.regs_.d = 0b10000000;
+    cpu.regs_.e = 0b00100001;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.h, 0b10000100);
+    EXPECT_EQ(cpu.regs_.l, 0);
+
+    cpu.regs_.h = 0b00000000;
+    cpu.regs_.l = 0b00001111;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.h, 0);
+    EXPECT_EQ(cpu.regs_.l, 30);
+
+    cpu.regs_.h = 0b00000011;
+    cpu.regs_.l =         0b00001011;
+    cpu.sp_     = 0b0010000000000101;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.h, 0b00100011);
+    EXPECT_EQ(cpu.regs_.l, 0b00010000);
+}
+
+TEST(OpcodesTest, ArithmeticINX)
+{
+    uint8_t memory[] = {
+        atat::opcodes::inx_b,
+        atat::opcodes::inx_d,
+        atat::opcodes::inx_h,
+        atat::opcodes::inx_sp,
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.regs_.b = 0xab;
+    cpu.regs_.c = 0xcd;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.b, 0xab);
+    EXPECT_EQ(cpu.regs_.c, 0xce);
+
+    cpu.regs_.d = 0xff;
+    cpu.regs_.e = 0xff;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.d, 0);
+    EXPECT_EQ(cpu.regs_.e, 0);
+
+    cpu.regs_.h = 0x12;
+    cpu.regs_.l = 0xff;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.h, 0x13);
+    EXPECT_EQ(cpu.regs_.l, 0);
+
+    cpu.sp_ = 1234;
+    cpu.step();
+    EXPECT_EQ(cpu.sp_, 1235);
+}

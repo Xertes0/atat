@@ -13,31 +13,44 @@ namespace atat
 
 // For more info
 // http://www.emulator101.com/reference/8080-by-opcode.html
+// http://textfiles.com/programming/8080.op
 namespace opcodes
 {
 
 static constexpr inline uint8_t nop   {0x00};
 
+static constexpr inline uint8_t inx_b {0x03};
 static constexpr inline uint8_t inr_b {0x04};
 static constexpr inline uint8_t dcr_b {0x05};
+
+static constexpr inline uint8_t dad_b {0x09};
 
 static constexpr inline uint8_t inr_c {0x0c};
 static constexpr inline uint8_t dcr_c {0x0d};
 
+static constexpr inline uint8_t inx_d {0x13};
 static constexpr inline uint8_t inr_d {0x14};
 static constexpr inline uint8_t dcr_d {0x15};
+
+static constexpr inline uint8_t dad_d {0x19};
 
 static constexpr inline uint8_t inr_e {0x1c};
 static constexpr inline uint8_t dcr_e {0x1d};
 
+static constexpr inline uint8_t inx_h {0x23};
 static constexpr inline uint8_t inr_h {0x24};
 static constexpr inline uint8_t dcr_h {0x25};
+
+static constexpr inline uint8_t dad_h {0x29};
 
 static constexpr inline uint8_t inr_l {0x2c};
 static constexpr inline uint8_t dcr_l {0x2d};
 
+static constexpr inline uint8_t inx_sp{0x33};
 static constexpr inline uint8_t inr_m {0x34};
 static constexpr inline uint8_t dcr_m {0x35};
+
+static constexpr inline uint8_t dad_sp{0x39};
 
 static constexpr inline uint8_t inr_a {0x3c};
 static constexpr inline uint8_t dcr_a {0x3d};

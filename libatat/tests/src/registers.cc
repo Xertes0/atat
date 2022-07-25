@@ -2,6 +2,32 @@
 
 #include <atat/cpu.hh>
 
+TEST(RegistersTest, ReadBC)
+{
+    auto regs = atat::registers{};
+
+    regs.b = 0xab;
+    regs.c = 0xcd;
+    EXPECT_EQ(regs.bc(), 0xabcd);
+
+    regs.b = 0x12;
+    regs.c = 0x34;
+    EXPECT_EQ(regs.bc(), 0x1234);
+}
+
+TEST(RegistersTest, ReadDE)
+{
+    auto regs = atat::registers{};
+
+    regs.d = 0xab;
+    regs.e = 0xcd;
+    EXPECT_EQ(regs.de(), 0xabcd);
+
+    regs.d = 0x12;
+    regs.e = 0x34;
+    EXPECT_EQ(regs.de(), 0x1234);
+}
+
 TEST(RegistersTest, ReadHL)
 {
     auto regs = atat::registers{};
