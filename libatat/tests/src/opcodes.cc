@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <gtest/gtest.h>
 
 #define private public
@@ -963,4 +964,18 @@ TEST(OpcodesTest, ArithmeticDCX)
     cpu.sp_ = 1234;
     cpu.step();
     EXPECT_EQ(cpu.sp_, 1233);
+}
+
+TEST(OpcodesTest, StackSPHL)
+{
+    uint8_t memory[] = {
+        atat::opcodes::sphl,
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.regs_.h = 0xab;
+    cpu.regs_.l = 0xcd;
+    cpu.step();
+    EXPECT_EQ(cpu.sp_, 0xabcd);
 }

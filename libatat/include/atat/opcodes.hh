@@ -137,6 +137,8 @@ static constexpr inline uint8_t xri_d8{0xee};
 
 static constexpr inline uint8_t ori_d8{0xf6};
 
+static constexpr inline uint8_t sphl  {0xf9};
+
 static constexpr inline uint8_t cpi_d8{0xfe};
 
 } // namespace atat::opcodes

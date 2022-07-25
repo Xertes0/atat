@@ -201,10 +201,9 @@ cpu::step()
             throw unimplemented_instruction_exception{*op};
             break;
         }
-        // NOP
+
         case opcodes::nop: break;
 
-        // Arithmetic
         case REG_ARI(add, a, +)
         case REG_ARI(add, b, +)
         case REG_ARI(add, c, +)
@@ -443,6 +442,12 @@ cpu::step()
         case opcodes::dcx_sp:
         {
             sp_ = sp_ - 1;
+            break;
+        }
+
+        case opcodes::sphl:
+        {
+            sp_ = regs_.hl();
             break;
         }
 
