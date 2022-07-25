@@ -112,6 +112,8 @@ static constexpr inline uint8_t aci_d8{0xce};
 
 static constexpr inline uint8_t sui_d8{0xd6};
 
+static constexpr inline uint8_t sbi_d8{0xde};
+
 static constexpr inline uint8_t ani_d8{0xe6};
 
 static constexpr inline uint8_t xri_d8{0xee};

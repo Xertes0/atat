@@ -831,3 +831,27 @@ TEST(OpcodesTest, ArithmeticACI)
     cpu.step();
     EXPECT_EQ(cpu.regs_.a, 31);
 }
+
+TEST(OpcodesTest, ArithmeticSBI)
+{
+    uint8_t memory[] = {
+        atat::opcodes::sbi_d8,
+        0,
+        atat::opcodes::sbi_d8,
+        0
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.regs_.a = 20;
+    memory[1] = 10;
+    cpu.flags_.c = 0;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 10);
+
+    cpu.regs_.a = 20;
+    memory[3] = 10;
+    cpu.flags_.c = 1;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 9);
+}

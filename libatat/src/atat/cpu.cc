@@ -325,6 +325,15 @@ cpu::step()
             break;
         }
 
+        case opcodes::sbi_d8:
+        {
+            uint16_t val = static_cast<uint16_t>(regs_.a) - static_cast<uint16_t>(*(op+1)) - static_cast<uint16_t>(flags_.c);
+            flags_.set_zspc(val);
+            regs_.a = static_cast<uint8_t>(val);
+            ++pc_;
+            break;
+        }
+
     }
     ++pc_;
 }
