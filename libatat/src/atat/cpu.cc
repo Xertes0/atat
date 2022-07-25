@@ -191,7 +191,18 @@ cpu::cpu(uint8_t* memory) :
     }
 
 #define JMP() \
-    pc_ = ((static_cast<uint16_t>(memory_[pc_ + 1]) << 8) | memory_[pc_ + 2]) - 1
+    pc_ = ((static_cast<uint16_t>(memory_[pc_ + 2]) << 8) | memory_[pc_ + 1]) - 1;
+
+#define CALL() \
+    uint16_t ret = pc_ + 3; \
+    memory_[sp_-1] = static_cast<uint8_t>(ret >> 8); \
+    memory_[sp_-2] = static_cast<uint8_t>(ret & 0xff); \
+    sp_ -= 2; \
+    pc_ = ((static_cast<uint16_t>(memory_[pc_+2]) << 8) | memory_[pc_+1]) - 1;
+
+#define RET() \
+    pc_ = ((static_cast<uint16_t>(memory_[sp_+1]) << 8) | memory_[sp_]) - 1; \
+    sp_ += 2;
 
 // break if
 #define BI_NZ() \
@@ -218,6 +229,16 @@ cpu::cpu(uint8_t* memory) :
         INS(); \
         break; \
     }
+
+#define MAKE_JCR_COMBO(NAME, CALL) \
+        case MAKE_JCR(NAME##nz, BI_Z,  CALL) \
+        case MAKE_JCR(NAME##z,  BI_NZ, CALL) \
+        case MAKE_JCR(NAME##nc, BI_C,  CALL) \
+        case MAKE_JCR(NAME##c,  BI_NC, CALL) \
+        case MAKE_JCR(NAME##po, BI_PE, CALL) \
+        case MAKE_JCR(NAME##pe, BI_PO, CALL) \
+        case MAKE_JCR(NAME##p,  BI_M,  CALL) \
+        case MAKE_JCR(NAME##m,  BI_P,  CALL)
 
 void
 cpu::step()
@@ -486,14 +507,21 @@ cpu::step()
             break;
         }
 
-        case MAKE_JCR(jnz, BI_Z, JMP)
-        case MAKE_JCR(jz, BI_NZ, JMP)
-        case MAKE_JCR(jnc, BI_C, JMP)
-        case MAKE_JCR(jc, BI_NC, JMP)
-        case MAKE_JCR(jpo, BI_PE, JMP)
-        case MAKE_JCR(jpe, BI_PO, JMP)
-        case MAKE_JCR(jp, BI_M, JMP)
-        case MAKE_JCR(jm, BI_P, JMP)
+        case opcodes::call:
+        {
+            CALL();
+            break;
+        }
+
+        case opcodes::ret:
+        {
+            RET();
+            break;
+        }
+
+        MAKE_JCR_COMBO(j, JMP)
+        MAKE_JCR_COMBO(c, CALL)
+        MAKE_JCR_COMBO(r, RET)
 
     }
     ++pc_;

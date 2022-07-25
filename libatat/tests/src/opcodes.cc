@@ -984,8 +984,8 @@ TEST(OpcodesTest, JCR_JMP)
 {
     uint8_t memory[] = {
         atat::opcodes::jmp,
-        0xab,
-        0xcd
+        0xcd,
+        0xab
     };
 
     auto cpu = atat::cpu{memory};
@@ -998,11 +998,11 @@ TEST(OpcodesTest, JCR_JNZ)
 {
     uint8_t memory[] = {
         atat::opcodes::jnz,
-        0xab,
         0xcd,
-        atat::opcodes::jnz,
         0xab,
-        0xcd
+        atat::opcodes::jnz,
+        0xcd,
+        0xab
     };
 
     auto cpu = atat::cpu{memory};
@@ -1020,11 +1020,11 @@ TEST(OpcodesTest, JCR_JZ)
 {
     uint8_t memory[] = {
         atat::opcodes::jz,
-        0xab,
         0xcd,
-        atat::opcodes::jz,
         0xab,
-        0xcd
+        atat::opcodes::jz,
+        0xcd,
+        0xab
     };
 
     auto cpu = atat::cpu{memory};
@@ -1042,11 +1042,11 @@ TEST(OpcodesTest, JCR_JNC)
 {
     uint8_t memory[] = {
         atat::opcodes::jnc,
-        0xab,
         0xcd,
-        atat::opcodes::jnc,
         0xab,
-        0xcd
+        atat::opcodes::jnc,
+        0xcd,
+        0xab
     };
 
     auto cpu = atat::cpu{memory};
@@ -1064,11 +1064,11 @@ TEST(OpcodesTest, JCR_JC)
 {
     uint8_t memory[] = {
         atat::opcodes::jc,
-        0xab,
         0xcd,
-        atat::opcodes::jc,
         0xab,
-        0xcd
+        atat::opcodes::jc,
+        0xcd,
+        0xab
     };
 
     auto cpu = atat::cpu{memory};
@@ -1086,11 +1086,11 @@ TEST(OpcodesTest, JCR_JPO)
 {
     uint8_t memory[] = {
         atat::opcodes::jpo,
-        0xab,
         0xcd,
-        atat::opcodes::jpo,
         0xab,
-        0xcd
+        atat::opcodes::jpo,
+        0xcd,
+        0xab
     };
 
     auto cpu = atat::cpu{memory};
@@ -1108,11 +1108,11 @@ TEST(OpcodesTest, JCR_JPE)
 {
     uint8_t memory[] = {
         atat::opcodes::jpe,
-        0xab,
         0xcd,
-        atat::opcodes::jpe,
         0xab,
-        0xcd
+        atat::opcodes::jpe,
+        0xcd,
+        0xab
     };
 
     auto cpu = atat::cpu{memory};
@@ -1130,11 +1130,11 @@ TEST(OpcodesTest, JCR_JP)
 {
     uint8_t memory[] = {
         atat::opcodes::jp,
-        0xab,
         0xcd,
-        atat::opcodes::jp,
         0xab,
-        0xcd
+        atat::opcodes::jp,
+        0xcd,
+        0xab
     };
 
     auto cpu = atat::cpu{memory};
@@ -1152,11 +1152,11 @@ TEST(OpcodesTest, JCR_JM)
 {
     uint8_t memory[] = {
         atat::opcodes::jm,
-        0xab,
         0xcd,
-        atat::opcodes::jm,
         0xab,
-        0xcd
+        atat::opcodes::jm,
+        0xcd,
+        0xab
     };
 
     auto cpu = atat::cpu{memory};
@@ -1168,4 +1168,55 @@ TEST(OpcodesTest, JCR_JM)
     cpu.flags_.s = 1;
     cpu.step();
     EXPECT_EQ(cpu.pc_, 0xabcd);
+}
+
+TEST(OpcodesTest, JCR_CALL)
+{
+    uint8_t memory[] = {
+        atat::opcodes::sphl,
+        atat::opcodes::call,
+        0xcd,
+        0xab,
+        0,
+        0
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.regs_.h = 0;
+    cpu.regs_.l = 6;
+    cpu.step();
+
+    cpu.step();
+    EXPECT_EQ(cpu.pc_, 0xabcd);
+    EXPECT_EQ(memory[4], 4);
+    EXPECT_EQ(memory[5], 0);
+    EXPECT_EQ(cpu.sp_, 4);
+}
+
+// Depends on working CALL
+TEST(OpcodesTest, JCR_RET)
+{
+    uint8_t memory[] = {
+        atat::opcodes::sphl,
+        atat::opcodes::call,
+        6,
+        0,
+        0,
+        0,
+        atat::opcodes::ret,
+        0,
+        0
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.regs_.h = 0;
+    cpu.regs_.l = 9;
+    cpu.step();
+    cpu.step();
+    cpu.step();
+
+    EXPECT_EQ(cpu.pc_, 4);
+    EXPECT_EQ(cpu.sp_, 9);
 }
