@@ -21,8 +21,8 @@ struct registers
 	uint8_t c; ///< Register c
 	uint8_t d; ///< Register d
 	uint8_t e; ///< Register e
-	uint8_t h; ///< Register h
-	uint8_t l; ///< Register l
+	uint8_t h; ///< Register h (high)
+	uint8_t l; ///< Register l (low)
 
 	/**
 	 * Returns 16 bit value combined from bc registers.

@@ -400,6 +400,20 @@ cpu::step()
             break;
         }
 
+        case opcodes::xthl:
+        {
+            auto hl   = regs_.hl();
+            auto low  = memory_[sp_];
+            auto high = memory_[sp_+1];
+
+            memory_[sp_]   = hl & 0xff;
+            memory_[sp_+1] = (hl >> 8) & 0xff;
+            regs_.h = high;
+            regs_.l = low;
+
+            break;
+        }
+
         case opcodes::jmp:
         {
             JMP();
@@ -421,6 +435,30 @@ cpu::step()
         MAKE_JCR_COMBO(j, JMP)
         MAKE_JCR_COMBO(c, CALL)
         MAKE_JCR_COMBO(r, RET)
+
+        case opcodes::cmc:
+        {
+            flags_.c = !flags_.c;
+            return;
+        }
+
+        case opcodes::stc:
+        {
+            flags_.c = 1;
+            return;
+        }
+
+        case opcodes::di:
+        {
+            int_enable_ = false;
+            break;
+        }
+
+        case opcodes::ei:
+        {
+            int_enable_ = true;
+            break;
+        }
 
     }
     ++pc_;
