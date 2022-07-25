@@ -127,14 +127,64 @@
     }
 
 #define MAKE_JCR_COMBO(NAME, CALL) \
-        case MAKE_JCR(NAME##nz, BI_Z,  CALL) \
-        case MAKE_JCR(NAME##z,  BI_NZ, CALL) \
-        case MAKE_JCR(NAME##nc, BI_C,  CALL) \
-        case MAKE_JCR(NAME##c,  BI_NC, CALL) \
-        case MAKE_JCR(NAME##po, BI_PE, CALL) \
-        case MAKE_JCR(NAME##pe, BI_PO, CALL) \
-        case MAKE_JCR(NAME##p,  BI_M,  CALL) \
-        case MAKE_JCR(NAME##m,  BI_P,  CALL)
+    case MAKE_JCR(NAME##nz, BI_Z,  CALL) \
+    case MAKE_JCR(NAME##z,  BI_NZ, CALL) \
+    case MAKE_JCR(NAME##nc, BI_C,  CALL) \
+    case MAKE_JCR(NAME##c,  BI_NC, CALL) \
+    case MAKE_JCR(NAME##po, BI_PE, CALL) \
+    case MAKE_JCR(NAME##pe, BI_PO, CALL) \
+    case MAKE_JCR(NAME##p,  BI_M,  CALL) \
+    case MAKE_JCR(NAME##m,  BI_P,  CALL)
+
+#define MOV(DST, SRC) \
+    opcodes::mov_##DST##SRC: \
+    { \
+        regs_.DST = regs_.SRC; \
+        break; \
+    }
+
+#define MOV_MEM(DST) \
+    opcodes::mov_##DST##m: \
+    { \
+        regs_.DST = static_cast<uint8_t>(regs_.hl()); \
+        break; \
+    }
+
+#define MOV_TMEM(SRC) \
+    opcodes::mov_m##SRC: \
+    { \
+        regs_.set_hl(regs_.SRC); \
+        break; \
+    }
+
+#define MOV_COMBO(DST) \
+    case MOV(DST, b) \
+    case MOV(DST, c) \
+    case MOV(DST, d) \
+    case MOV(DST, e) \
+    case MOV(DST, h) \
+    case MOV(DST, l) \
+    case MOV_MEM(DST) \
+    case MOV(DST, a)
+
+#define MOV_MCOMBO() \
+    case MOV_TMEM(b) \
+    case MOV_TMEM(c) \
+    case MOV_TMEM(d) \
+    case MOV_TMEM(e) \
+    case MOV_TMEM(h) \
+    case MOV_TMEM(l) \
+    case MOV_TMEM(a)
+
+#define MOV_COMBO_COMBO() \
+    MOV_COMBO(b) \
+    MOV_COMBO(c) \
+    MOV_COMBO(d) \
+    MOV_COMBO(e) \
+    MOV_COMBO(h) \
+    MOV_COMBO(l) \
+    MOV_MCOMBO() \
+    MOV_COMBO(a)
 
 namespace atat
 {
@@ -459,6 +509,8 @@ cpu::step()
             int_enable_ = true;
             break;
         }
+
+        MOV_COMBO_COMBO()
 
     }
     ++pc_;
