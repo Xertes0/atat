@@ -422,6 +422,30 @@ cpu::step()
             break;
         }
 
+        case opcodes::dcx_b:
+        {
+            regs_.set_bc(regs_.bc() - 1);
+            break;
+        }
+
+        case opcodes::dcx_d:
+        {
+            regs_.set_de(regs_.de() - 1);
+            break;
+        }
+
+        case opcodes::dcx_h:
+        {
+            regs_.set_hl(regs_.hl() - 1);
+            break;
+        }
+
+        case opcodes::dcx_sp:
+        {
+            sp_ = sp_ - 1;
+            break;
+        }
+
     }
     ++pc_;
 }

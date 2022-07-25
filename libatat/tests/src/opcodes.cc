@@ -930,3 +930,37 @@ TEST(OpcodesTest, ArithmeticINX)
     cpu.step();
     EXPECT_EQ(cpu.sp_, 1235);
 }
+
+TEST(OpcodesTest, ArithmeticDCX)
+{
+    uint8_t memory[] = {
+        atat::opcodes::dcx_b,
+        atat::opcodes::dcx_d,
+        atat::opcodes::dcx_h,
+        atat::opcodes::dcx_sp,
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.regs_.b = 0xab;
+    cpu.regs_.c = 0xcd;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.b, 0xab);
+    EXPECT_EQ(cpu.regs_.c, 0xcc);
+
+    cpu.regs_.d = 0xff;
+    cpu.regs_.e = 0xff;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.d, 0xff);
+    EXPECT_EQ(cpu.regs_.e, 0xfe);
+
+    cpu.regs_.h = 0x12;
+    cpu.regs_.l = 0xff;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.h, 0x12);
+    EXPECT_EQ(cpu.regs_.l, 0xfe);
+
+    cpu.sp_ = 1234;
+    cpu.step();
+    EXPECT_EQ(cpu.sp_, 1233);
+}
