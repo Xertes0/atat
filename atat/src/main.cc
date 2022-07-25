@@ -5,7 +5,7 @@
 #include <vector>
 
 #include <atat/disassembler.hh>
-#include <atat/cpu.hh>
+#include <atat/cpu/cpu.hh>
 
 int main(int argc, char const** argv)
 {

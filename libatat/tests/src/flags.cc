@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <atat/cpu.hh>
+#include <atat/cpu/flags.hh>
 
 TEST(FlagsTest, ParityPositive)
 {

@@ -1,8 +1,7 @@
-#include <cstdint>
 #include <gtest/gtest.h>
 
 #define private public
-#include <atat/cpu.hh>
+#include <atat/cpu/cpu.hh>
 #undef private
 
 #include <atat/opcodes.hh>
