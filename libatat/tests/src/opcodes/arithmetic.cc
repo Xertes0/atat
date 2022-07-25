@@ -6,6 +6,8 @@
 
 #include <atat/opcodes.hh>
 
+// TODO Check flags
+
 TEST(OpcodesTest, Arithmetic_ADD)
 {
     uint8_t memory[] = {

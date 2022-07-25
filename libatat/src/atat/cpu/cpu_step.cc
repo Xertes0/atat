@@ -18,6 +18,16 @@
         break; \
     }
 
+#define REG_ARI_COMBO(NAME, OP) \
+    case REG_ARI(NAME, a, OP) \
+    case REG_ARI(NAME, b, OP) \
+    case REG_ARI(NAME, c, OP) \
+    case REG_ARI(NAME, d, OP) \
+    case REG_ARI(NAME, e, OP) \
+    case REG_ARI(NAME, h, OP) \
+    case REG_ARI(NAME, l, OP) \
+    case REG_ARI_MEM(NAME, OP)
+
 #define REG_ONE(NAME, REG, OP) \
     opcodes::NAME##_##REG: \
     { \
@@ -36,6 +46,16 @@
         break; \
     }
 
+#define REG_ONE_COMBO(NAME, OP) \
+    case REG_ONE(NAME, a, OP) \
+    case REG_ONE(NAME, b, OP) \
+    case REG_ONE(NAME, c, OP) \
+    case REG_ONE(NAME, d, OP) \
+    case REG_ONE(NAME, e, OP) \
+    case REG_ONE(NAME, h, OP) \
+    case REG_ONE(NAME, l, OP) \
+    case REG_ONE_MEM(NAME, OP)
+
 #define REG_CMP(REG) \
     opcodes::cmp_##REG: \
     { \
@@ -49,6 +69,16 @@
         flags_.set_zspc(static_cast<uint16_t>(regs_.a) - static_cast<uint16_t>(memory_[regs_.hl()])); \
         break; \
     }
+
+#define REG_CMP_COMBO() \
+    case REG_CMP(a) \
+    case REG_CMP(b) \
+    case REG_CMP(c) \
+    case REG_CMP(d) \
+    case REG_CMP(e) \
+    case REG_CMP(h) \
+    case REG_CMP(l) \
+    case REG_CMP_MEM()
 
 #define REG_LOG(NAME, REG, OP) \
     opcodes::NAME##_##REG: \
@@ -68,6 +98,25 @@
         break; \
     }
 
+#define REG_MP_DATA(NAME, OP) \
+    opcodes::NAME##_d8: \
+    { \
+        uint16_t val = static_cast<uint16_t>(regs_.a) OP static_cast<uint16_t>(*(op+1)); \
+        flags_.set_zspc(val); \
+        regs_.a = static_cast<uint8_t>(val); \
+        ++pc_; \
+        break; \
+    }
+#define REG_LOG_COMBO(NAME, OP) \
+    case REG_LOG(NAME, a, OP) \
+    case REG_LOG(NAME, b, OP) \
+    case REG_LOG(NAME, c, OP) \
+    case REG_LOG(NAME, d, OP) \
+    case REG_LOG(NAME, e, OP) \
+    case REG_LOG(NAME, h, OP) \
+    case REG_LOG(NAME, l, OP) \
+    case REG_LOG_MEM(NAME, OP)
+
 #define REG_ARI_CY(NAME,REG, OP) \
     opcodes::NAME##_##REG: \
     { \
@@ -83,6 +132,76 @@
         uint16_t val = static_cast<uint16_t>(regs_.a) OP static_cast<uint16_t>(memory_[regs_.hl()]) OP static_cast<uint16_t>(flags_.c); \
         flags_.set_zspc(val); \
         regs_.a = static_cast<uint8_t>(val); \
+        break; \
+    }
+
+#define REG_ARI_CY_DATA(NAME, OP) \
+    opcodes::NAME##_d8: \
+    { \
+        uint16_t val = static_cast<uint16_t>(regs_.a) OP static_cast<uint16_t>(*(op+1)) OP static_cast<uint16_t>(flags_.c); \
+        flags_.set_zspc(val); \
+        regs_.a = static_cast<uint8_t>(val); \
+        ++pc_; \
+        break; \
+    }
+
+#define REG_ARI_CY_COMBO(NAME, OP) \
+    case REG_ARI_CY(NAME, a, OP) \
+    case REG_ARI_CY(NAME, b, OP) \
+    case REG_ARI_CY(NAME, c, OP) \
+    case REG_ARI_CY(NAME, d, OP) \
+    case REG_ARI_CY(NAME, e, OP) \
+    case REG_ARI_CY(NAME, h, OP) \
+    case REG_ARI_CY(NAME, l, OP) \
+    case REG_ARI_CY_MEM(NAME, OP)
+
+#define REG_DAD(NAME, FUN) \
+    opcodes::dad_##NAME: \
+    { \
+        uint16_t val = regs_.hl() + regs_.FUN(); \
+        flags_.set_c(val); \
+        regs_.set_hl(val); \
+        break; \
+    }
+
+#define REG_DAD_COMBO() \
+    case REG_DAD(b, bc) \
+    case REG_DAD(d, de) \
+    case REG_DAD(h, hl) \
+    case opcodes::dad_sp: \
+    { \
+        uint16_t val = regs_.hl() + sp_; \
+        flags_.set_c(val); \
+        regs_.set_hl(val); \
+        break; \
+    }
+
+#define REG_IDC(NAME, FUN, OP) \
+    opcodes::NAME: \
+    { \
+        regs_.set_##FUN(regs_.FUN() OP 1); \
+        break; \
+    }
+
+#define REG_IDC_SP(NAME, OP) \
+    opcodes::NAME: \
+    { \
+        sp_ = sp_ OP 1; \
+        break; \
+    }
+
+#define REG_IDC_COMBO(NAME, OP) \
+    case REG_IDC(NAME##_b, bc, OP) \
+    case REG_IDC(NAME##_d, de, OP) \
+    case REG_IDC(NAME##_h, hl, OP) \
+    case REG_IDC_SP(NAME##_sp, OP)
+
+#define REG_CPI() \
+    opcodes::cpi_d8: \
+    { \
+        uint16_t val = static_cast<uint16_t>(regs_.a) - static_cast<uint16_t>(*(op+1)); \
+        flags_.set_zspc(val); \
+        ++pc_; \
         break; \
     }
 
@@ -126,7 +245,12 @@
         break; \
     }
 
-#define MAKE_JCR_COMBO(NAME, CALL) \
+#define MAKE_JCR_COMBO(FULL, NAME, CALL) \
+    case opcodes::FULL: \
+    { \
+        CALL(); \
+        break; \
+    } \
     case MAKE_JCR(NAME##nz, BI_Z,  CALL) \
     case MAKE_JCR(NAME##z,  BI_NZ, CALL) \
     case MAKE_JCR(NAME##nc, BI_C,  CALL) \
@@ -196,253 +320,48 @@ cpu::step()
 
     switch(*op)
     {
-        default: {
+        default:
+        {
             throw unimplemented_instruction_exception{*op};
             break;
         }
 
         case opcodes::nop: break;
 
-        case REG_ARI(add, a, +)
-        case REG_ARI(add, b, +)
-        case REG_ARI(add, c, +)
-        case REG_ARI(add, d, +)
-        case REG_ARI(add, e, +)
-        case REG_ARI(add, h, +)
-        case REG_ARI(add, l, +)
-        case REG_ARI_MEM(add, +)
+        REG_ARI_COMBO(add, +)
+        REG_ARI_COMBO(sub, -)
 
-        case REG_ARI(sub, a, -)
-        case REG_ARI(sub, b, -)
-        case REG_ARI(sub, c, -)
-        case REG_ARI(sub, d, -)
-        case REG_ARI(sub, e, -)
-        case REG_ARI(sub, h, -)
-        case REG_ARI(sub, l, -)
-        case REG_ARI_MEM(sub, -)
+        REG_ONE_COMBO(inr, +)
+        REG_ONE_COMBO(dcr, -)
 
-        case REG_ONE(inr, a, +)
-        case REG_ONE(inr, b, +)
-        case REG_ONE(inr, c, +)
-        case REG_ONE(inr, d, +)
-        case REG_ONE(inr, e, +)
-        case REG_ONE(inr, h, +)
-        case REG_ONE(inr, l, +)
-        case REG_ONE_MEM(inr, +)
+        REG_CMP_COMBO()
 
-        case REG_ONE(dcr, a, -)
-        case REG_ONE(dcr, b, -)
-        case REG_ONE(dcr, c, -)
-        case REG_ONE(dcr, d, -)
-        case REG_ONE(dcr, e, -)
-        case REG_ONE(dcr, h, -)
-        case REG_ONE(dcr, l, -)
-        case REG_ONE_MEM(dcr, -)
+        REG_LOG_COMBO(ana, &)
+        REG_LOG_COMBO(ora, |)
+        REG_LOG_COMBO(xra, ^)
 
-        case REG_CMP(a)
-        case REG_CMP(b)
-        case REG_CMP(c)
-        case REG_CMP(d)
-        case REG_CMP(e)
-        case REG_CMP(h)
-        case REG_CMP(l)
-        case REG_CMP_MEM()
+        case REG_CPI()
 
-        case REG_LOG(ana, a, &)
-        case REG_LOG(ana, b, &)
-        case REG_LOG(ana, c, &)
-        case REG_LOG(ana, d, &)
-        case REG_LOG(ana, e, &)
-        case REG_LOG(ana, h, &)
-        case REG_LOG(ana, l, &)
-        case REG_LOG_MEM(ana, &)
+        case REG_MP_DATA(adi, +)
+        case REG_MP_DATA(sui, -)
+        case REG_MP_DATA(ani, &)
+        case REG_MP_DATA(ori, |)
+        case REG_MP_DATA(xri, ^)
 
-        case REG_LOG(ora, a, |)
-        case REG_LOG(ora, b, |)
-        case REG_LOG(ora, c, |)
-        case REG_LOG(ora, d, |)
-        case REG_LOG(ora, e, |)
-        case REG_LOG(ora, h, |)
-        case REG_LOG(ora, l, |)
-        case REG_LOG_MEM(ora, |)
+        REG_ARI_CY_COMBO(adc, +)
+        REG_ARI_CY_COMBO(sbb, -)
 
-        case REG_LOG(xra, a, ^)
-        case REG_LOG(xra, b, ^)
-        case REG_LOG(xra, c, ^)
-        case REG_LOG(xra, d, ^)
-        case REG_LOG(xra, e, ^)
-        case REG_LOG(xra, h, ^)
-        case REG_LOG(xra, l, ^)
-        case REG_LOG_MEM(xra, ^)
+        case REG_ARI_CY_DATA(aci, +)
+        case REG_ARI_CY_DATA(sbi, -)
 
-        case opcodes::adi_d8:
-        {
-            uint16_t val = static_cast<uint16_t>(regs_.a) + static_cast<uint16_t>(*(op+1));
-            flags_.set_zspc(val);
-            regs_.a = static_cast<uint8_t>(val);
-            ++pc_;
-            break;
-        }
+        REG_DAD_COMBO()
 
-        case opcodes::sui_d8:
-        {
-            uint16_t val = static_cast<uint16_t>(regs_.a) - static_cast<uint16_t>(*(op+1));
-            flags_.set_zspc(val);
-            regs_.a = static_cast<uint8_t>(val);
-            ++pc_;
-            break;
-        }
+        REG_IDC_COMBO(inx, +)
+        REG_IDC_COMBO(dcx, -)
 
-        case opcodes::cpi_d8:
-        {
-            uint16_t val = static_cast<uint16_t>(regs_.a) - static_cast<uint16_t>(*(op+1));
-            flags_.set_zspc(val);
-            ++pc_;
-            break;
-        }
-
-        case opcodes::ani_d8:
-        {
-            uint16_t val = static_cast<uint16_t>(regs_.a) & static_cast<uint16_t>(*(op+1));
-            flags_.set_zspc(val);
-            regs_.a = static_cast<uint8_t>(val);
-            ++pc_;
-            break;
-        }
-
-        case opcodes::ori_d8:
-        {
-            uint16_t val = static_cast<uint16_t>(regs_.a) | static_cast<uint16_t>(*(op+1));
-            flags_.set_zspc(val);
-            regs_.a = static_cast<uint8_t>(val);
-            ++pc_;
-            break;
-        }
-
-        case opcodes::xri_d8:
-        {
-            uint16_t val = static_cast<uint16_t>(regs_.a) ^ static_cast<uint16_t>(*(op+1));
-            flags_.set_zspc(val);
-            regs_.a = static_cast<uint8_t>(val);
-            ++pc_;
-            break;
-        }
-
-        case REG_ARI_CY(adc, a, +)
-        case REG_ARI_CY(adc, b, +)
-        case REG_ARI_CY(adc, c, +)
-        case REG_ARI_CY(adc, d, +)
-        case REG_ARI_CY(adc, e, +)
-        case REG_ARI_CY(adc, h, +)
-        case REG_ARI_CY(adc, l, +)
-        case REG_ARI_CY_MEM(adc, +)
-
-        case REG_ARI_CY(sbb, a, -)
-        case REG_ARI_CY(sbb, b, -)
-        case REG_ARI_CY(sbb, c, -)
-        case REG_ARI_CY(sbb, d, -)
-        case REG_ARI_CY(sbb, e, -)
-        case REG_ARI_CY(sbb, h, -)
-        case REG_ARI_CY(sbb, l, -)
-        case REG_ARI_CY_MEM(sbb, -)
-
-        case opcodes::aci_d8:
-        {
-            uint16_t val = static_cast<uint16_t>(regs_.a) + static_cast<uint16_t>(*(op+1)) + static_cast<uint16_t>(flags_.c);
-            flags_.set_zspc(val);
-            regs_.a = static_cast<uint8_t>(val);
-            ++pc_;
-            break;
-        }
-
-        case opcodes::sbi_d8:
-        {
-            uint16_t val = static_cast<uint16_t>(regs_.a) - static_cast<uint16_t>(*(op+1)) - static_cast<uint16_t>(flags_.c);
-            flags_.set_zspc(val);
-            regs_.a = static_cast<uint8_t>(val);
-            ++pc_;
-            break;
-        }
-
-        case opcodes::dad_b:
-        {
-            uint16_t val = regs_.hl() + regs_.bc();
-            flags_.set_c(val);
-            regs_.set_hl(val);
-            break;
-        }
-
-        case opcodes::dad_d:
-        {
-            uint16_t val = regs_.hl() + regs_.de();
-            flags_.set_c(val);
-            regs_.set_hl(val);
-            break;
-        }
-
-        case opcodes::dad_h:
-        {
-            uint16_t val = regs_.hl() + regs_.hl();
-            flags_.set_c(val);
-            regs_.set_hl(val);
-            break;
-        }
-
-        case opcodes::dad_sp:
-        {
-            uint16_t val = regs_.hl() + sp_;
-            flags_.set_c(val);
-            regs_.set_hl(val);
-            break;
-        }
-
-        case opcodes::inx_b:
-        {
-            regs_.set_bc(regs_.bc() + 1);
-            break;
-        }
-
-        case opcodes::inx_d:
-        {
-            regs_.set_de(regs_.de() + 1);
-            break;
-        }
-
-        case opcodes::inx_h:
-        {
-            regs_.set_hl(regs_.hl() + 1);
-            break;
-        }
-
-        case opcodes::inx_sp:
-        {
-            sp_ = sp_ + 1;
-            break;
-        }
-
-        case opcodes::dcx_b:
-        {
-            regs_.set_bc(regs_.bc() - 1);
-            break;
-        }
-
-        case opcodes::dcx_d:
-        {
-            regs_.set_de(regs_.de() - 1);
-            break;
-        }
-
-        case opcodes::dcx_h:
-        {
-            regs_.set_hl(regs_.hl() - 1);
-            break;
-        }
-
-        case opcodes::dcx_sp:
-        {
-            sp_ = sp_ - 1;
-            break;
-        }
+        MAKE_JCR_COMBO(jmp,  j, JMP)
+        MAKE_JCR_COMBO(call, c, CALL)
+        MAKE_JCR_COMBO(ret,  r, RET)
 
         case opcodes::sphl:
         {
@@ -463,28 +382,6 @@ cpu::step()
 
             break;
         }
-
-        case opcodes::jmp:
-        {
-            JMP();
-            break;
-        }
-
-        case opcodes::call:
-        {
-            CALL();
-            break;
-        }
-
-        case opcodes::ret:
-        {
-            RET();
-            break;
-        }
-
-        MAKE_JCR_COMBO(j, JMP)
-        MAKE_JCR_COMBO(c, CALL)
-        MAKE_JCR_COMBO(r, RET)
 
         case opcodes::cmc:
         {
