@@ -7,7 +7,7 @@
 
 #include <atat/opcodes.hh>
 
-TEST(OpcodesTest, ArithmeticADD)
+TEST(OpcodesTest, Arithmetic_ADD)
 {
     uint8_t memory[] = {
         atat::opcodes::add_a,
@@ -65,7 +65,7 @@ TEST(OpcodesTest, ArithmeticADD)
     EXPECT_EQ(cpu.regs_.a, 110);
 }
 
-TEST(OpcodesTest, ArithmeticSUB)
+TEST(OpcodesTest, Arithmetic_SUB)
 {
     uint8_t memory[] = {
         atat::opcodes::sub_a,
@@ -123,7 +123,7 @@ TEST(OpcodesTest, ArithmeticSUB)
     EXPECT_EQ(cpu.regs_.a, 80);
 }
 
-TEST(OpcodesTest, ArithmeticINR)
+TEST(OpcodesTest, Arithmetic_INR)
 {
     uint8_t memory[] = {
         atat::opcodes::inr_a,
@@ -174,7 +174,7 @@ TEST(OpcodesTest, ArithmeticINR)
     EXPECT_EQ(memory[8], 11);
 }
 
-TEST(OpcodesTest, ArithmeticDCR)
+TEST(OpcodesTest, Arithmetic_DCR)
 {
     uint8_t memory[] = {
         atat::opcodes::dcr_a,
@@ -225,7 +225,7 @@ TEST(OpcodesTest, ArithmeticDCR)
     EXPECT_EQ(memory[8], 9);
 }
 
-TEST(OpcodesTest, ArithmeticCMP)
+TEST(OpcodesTest, Arithmetic_CMP)
 {
     uint8_t memory[] = {
         atat::opcodes::cmp_a,
@@ -283,7 +283,7 @@ TEST(OpcodesTest, ArithmeticCMP)
     EXPECT_EQ(cpu.flags_.z, 1);
 }
 
-TEST(OpcodesTest, ArithmeticANA)
+TEST(OpcodesTest, Arithmetic_ANA)
 {
     uint8_t memory[] = {
         atat::opcodes::ana_a,
@@ -341,7 +341,7 @@ TEST(OpcodesTest, ArithmeticANA)
     EXPECT_EQ(cpu.regs_.a, 1);
 }
 
-TEST(OpcodesTest, ArithmeticORA)
+TEST(OpcodesTest, Arithmetic_ORA)
 {
     uint8_t memory[] = {
         atat::opcodes::ora_a,
@@ -399,7 +399,7 @@ TEST(OpcodesTest, ArithmeticORA)
     EXPECT_EQ(cpu.regs_.a, 0b1011);
 }
 
-TEST(OpcodesTest, ArithmeticXRA)
+TEST(OpcodesTest, Arithmetic_XRA)
 {
     uint8_t memory[] = {
         atat::opcodes::xra_a,
@@ -457,7 +457,7 @@ TEST(OpcodesTest, ArithmeticXRA)
     EXPECT_EQ(cpu.regs_.a, 0b1010);
 }
 
-TEST(OpcodesTest, ArithmeticADI)
+TEST(OpcodesTest, Arithmetic_ADI)
 {
     uint8_t memory[] = {
         atat::opcodes::adi_d8,
@@ -473,7 +473,7 @@ TEST(OpcodesTest, ArithmeticADI)
     EXPECT_EQ(cpu.pc_, 2);
 }
 
-TEST(OpcodesTest, ArithmeticSUI)
+TEST(OpcodesTest, Arithmetic_SUI)
 {
     uint8_t memory[] = {
         atat::opcodes::sui_d8,
@@ -489,7 +489,7 @@ TEST(OpcodesTest, ArithmeticSUI)
     EXPECT_EQ(cpu.pc_, 2);
 }
 
-TEST(OpcodesTest, ArithmeticCPI)
+TEST(OpcodesTest, Arithmetic_CPI)
 {
     uint8_t memory[] = {
         atat::opcodes::cpi_d8,
@@ -515,7 +515,7 @@ TEST(OpcodesTest, ArithmeticCPI)
     EXPECT_EQ(cpu.pc_, 4);
 }
 
-TEST(OpcodesTest, ArithmeticANI)
+TEST(OpcodesTest, Arithmetic_ANI)
 {
     uint8_t memory[] = {
         atat::opcodes::ani_d8,
@@ -531,7 +531,7 @@ TEST(OpcodesTest, ArithmeticANI)
     EXPECT_EQ(cpu.pc_, 2);
 }
 
-TEST(OpcodesTest, ArithmeticORI)
+TEST(OpcodesTest, Arithmetic_ORI)
 {
     uint8_t memory[] = {
         atat::opcodes::ori_d8,
@@ -547,7 +547,7 @@ TEST(OpcodesTest, ArithmeticORI)
     EXPECT_EQ(cpu.pc_, 2);
 }
 
-TEST(OpcodesTest, ArithmeticXRI)
+TEST(OpcodesTest, Arithmetic_XRI)
 {
     uint8_t memory[] = {
         atat::opcodes::xri_d8,
@@ -563,7 +563,7 @@ TEST(OpcodesTest, ArithmeticXRI)
     EXPECT_EQ(cpu.pc_, 2);
 }
 
-TEST(OpcodesTest, ArithmeticADC)
+TEST(OpcodesTest, Arithmetic_ADC)
 {
     uint8_t memory[] = {
         atat::opcodes::adc_a,
@@ -686,7 +686,7 @@ TEST(OpcodesTest, ArithmeticADC)
     EXPECT_EQ(cpu.regs_.a, 110);
 }
 
-TEST(OpcodesTest, ArithmeticSBB)
+TEST(OpcodesTest, Arithmetic_SBB)
 {
     uint8_t memory[] = {
         atat::opcodes::sbb_a,
@@ -809,7 +809,7 @@ TEST(OpcodesTest, ArithmeticSBB)
     EXPECT_EQ(cpu.regs_.a, 79);
 }
 
-TEST(OpcodesTest, ArithmeticACI)
+TEST(OpcodesTest, Arithmetic_ACI)
 {
     uint8_t memory[] = {
         atat::opcodes::aci_d8,
@@ -833,7 +833,7 @@ TEST(OpcodesTest, ArithmeticACI)
     EXPECT_EQ(cpu.regs_.a, 31);
 }
 
-TEST(OpcodesTest, ArithmeticSBI)
+TEST(OpcodesTest, Arithmetic_SBI)
 {
     uint8_t memory[] = {
         atat::opcodes::sbi_d8,
@@ -857,7 +857,7 @@ TEST(OpcodesTest, ArithmeticSBI)
     EXPECT_EQ(cpu.regs_.a, 9);
 }
 
-TEST(OpcodesTest, ArithmeticDAD)
+TEST(OpcodesTest, Arithmetic_DAD)
 {
     uint8_t memory[] = {
         atat::opcodes::dad_b,
@@ -898,7 +898,7 @@ TEST(OpcodesTest, ArithmeticDAD)
     EXPECT_EQ(cpu.regs_.l, 0b00010000);
 }
 
-TEST(OpcodesTest, ArithmeticINX)
+TEST(OpcodesTest, Arithmetic_INX)
 {
     uint8_t memory[] = {
         atat::opcodes::inx_b,
@@ -932,7 +932,7 @@ TEST(OpcodesTest, ArithmeticINX)
     EXPECT_EQ(cpu.sp_, 1235);
 }
 
-TEST(OpcodesTest, ArithmeticDCX)
+TEST(OpcodesTest, Arithmetic_DCX)
 {
     uint8_t memory[] = {
         atat::opcodes::dcx_b,
@@ -966,7 +966,7 @@ TEST(OpcodesTest, ArithmeticDCX)
     EXPECT_EQ(cpu.sp_, 1233);
 }
 
-TEST(OpcodesTest, StackSPHL)
+TEST(OpcodesTest, Stack_SPHL)
 {
     uint8_t memory[] = {
         atat::opcodes::sphl,
@@ -978,4 +978,194 @@ TEST(OpcodesTest, StackSPHL)
     cpu.regs_.l = 0xcd;
     cpu.step();
     EXPECT_EQ(cpu.sp_, 0xabcd);
+}
+
+TEST(OpcodesTest, JCR_JMP)
+{
+    uint8_t memory[] = {
+        atat::opcodes::jmp,
+        0xab,
+        0xcd
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.step();
+    EXPECT_EQ(cpu.pc_, 0xabcd);
+}
+
+TEST(OpcodesTest, JCR_JNZ)
+{
+    uint8_t memory[] = {
+        atat::opcodes::jnz,
+        0xab,
+        0xcd,
+        atat::opcodes::jnz,
+        0xab,
+        0xcd
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.flags_.z = 0;
+    cpu.step();
+    EXPECT_NE(cpu.pc_, 0xabcd);
+
+    cpu.flags_.z = 1;
+    cpu.step();
+    EXPECT_EQ(cpu.pc_, 0xabcd);
+}
+
+TEST(OpcodesTest, JCR_JZ)
+{
+    uint8_t memory[] = {
+        atat::opcodes::jz,
+        0xab,
+        0xcd,
+        atat::opcodes::jz,
+        0xab,
+        0xcd
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.flags_.z = 1;
+    cpu.step();
+    EXPECT_NE(cpu.pc_, 0xabcd);
+
+    cpu.flags_.z = 0;
+    cpu.step();
+    EXPECT_EQ(cpu.pc_, 0xabcd);
+}
+
+TEST(OpcodesTest, JCR_JNC)
+{
+    uint8_t memory[] = {
+        atat::opcodes::jnc,
+        0xab,
+        0xcd,
+        atat::opcodes::jnc,
+        0xab,
+        0xcd
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.flags_.c = 1;
+    cpu.step();
+    EXPECT_NE(cpu.pc_, 0xabcd);
+
+    cpu.flags_.c = 0;
+    cpu.step();
+    EXPECT_EQ(cpu.pc_, 0xabcd);
+}
+
+TEST(OpcodesTest, JCR_JC)
+{
+    uint8_t memory[] = {
+        atat::opcodes::jc,
+        0xab,
+        0xcd,
+        atat::opcodes::jc,
+        0xab,
+        0xcd
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.flags_.c = 0;
+    cpu.step();
+    EXPECT_NE(cpu.pc_, 0xabcd);
+
+    cpu.flags_.c = 1;
+    cpu.step();
+    EXPECT_EQ(cpu.pc_, 0xabcd);
+}
+
+TEST(OpcodesTest, JCR_JPO)
+{
+    uint8_t memory[] = {
+        atat::opcodes::jpo,
+        0xab,
+        0xcd,
+        atat::opcodes::jpo,
+        0xab,
+        0xcd
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.flags_.p = 1;
+    cpu.step();
+    EXPECT_NE(cpu.pc_, 0xabcd);
+
+    cpu.flags_.p = 0;
+    cpu.step();
+    EXPECT_EQ(cpu.pc_, 0xabcd);
+}
+
+TEST(OpcodesTest, JCR_JPE)
+{
+    uint8_t memory[] = {
+        atat::opcodes::jpe,
+        0xab,
+        0xcd,
+        atat::opcodes::jpe,
+        0xab,
+        0xcd
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.flags_.p = 0;
+    cpu.step();
+    EXPECT_NE(cpu.pc_, 0xabcd);
+
+    cpu.flags_.p = 1;
+    cpu.step();
+    EXPECT_EQ(cpu.pc_, 0xabcd);
+}
+
+TEST(OpcodesTest, JCR_JP)
+{
+    uint8_t memory[] = {
+        atat::opcodes::jp,
+        0xab,
+        0xcd,
+        atat::opcodes::jp,
+        0xab,
+        0xcd
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.flags_.s = 1;
+    cpu.step();
+    EXPECT_NE(cpu.pc_, 0xabcd);
+
+    cpu.flags_.s = 0;
+    cpu.step();
+    EXPECT_EQ(cpu.pc_, 0xabcd);
+}
+
+TEST(OpcodesTest, JCR_JM)
+{
+    uint8_t memory[] = {
+        atat::opcodes::jm,
+        0xab,
+        0xcd,
+        atat::opcodes::jm,
+        0xab,
+        0xcd
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.flags_.s = 0;
+    cpu.step();
+    EXPECT_NE(cpu.pc_, 0xabcd);
+
+    cpu.flags_.s = 1;
+    cpu.step();
+    EXPECT_EQ(cpu.pc_, 0xabcd);
 }

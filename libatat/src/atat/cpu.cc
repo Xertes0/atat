@@ -190,6 +190,35 @@ cpu::cpu(uint8_t* memory) :
         break; \
     }
 
+#define JMP() \
+    pc_ = ((static_cast<uint16_t>(memory_[pc_ + 1]) << 8) | memory_[pc_ + 2]) - 1
+
+// break if
+#define BI_NZ() \
+    if(flags_.z == 1) { pc_ += 2; break; }
+#define BI_Z() \
+    if(flags_.z == 0) { pc_ += 2; break; }
+#define BI_NC() \
+    if(flags_.c == 0) { pc_ += 2; break; }
+#define BI_C() \
+    if(flags_.c == 1) { pc_ += 2; break; }
+#define BI_PO() \
+    if(flags_.p == 0) { pc_ += 2; break; }
+#define BI_PE() \
+    if(flags_.p == 1) { pc_ += 2; break; }
+#define BI_P() \
+    if(flags_.s == 0) { pc_ += 2; break; }
+#define BI_M() \
+    if(flags_.s == 1) { pc_ += 2; break; }
+
+#define MAKE_JCR(OPCODE, BI, INS) \
+    opcodes::OPCODE: \
+    { \
+        BI(); \
+        INS(); \
+        break; \
+    }
+
 void
 cpu::step()
 {
@@ -450,6 +479,21 @@ cpu::step()
             sp_ = regs_.hl();
             break;
         }
+
+        case opcodes::jmp:
+        {
+            JMP();
+            break;
+        }
+
+        case MAKE_JCR(jnz, BI_Z, JMP)
+        case MAKE_JCR(jz, BI_NZ, JMP)
+        case MAKE_JCR(jnc, BI_C, JMP)
+        case MAKE_JCR(jc, BI_NC, JMP)
+        case MAKE_JCR(jpo, BI_PE, JMP)
+        case MAKE_JCR(jpe, BI_PO, JMP)
+        case MAKE_JCR(jp, BI_M, JMP)
+        case MAKE_JCR(jm, BI_P, JMP)
 
     }
     ++pc_;
