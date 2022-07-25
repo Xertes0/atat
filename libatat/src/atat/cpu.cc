@@ -140,6 +140,24 @@ cpu::cpu(uint8_t* memory) :
         break; \
     }
 
+#define REG_ARI_CY(NAME,REG, OP) \
+    opcodes::NAME##_##REG: \
+    { \
+        uint16_t val = static_cast<uint16_t>(regs_.a) OP static_cast<uint16_t>(regs_.REG) OP static_cast<uint16_t>(flags_.c); \
+        flags_.set_zspc(val); \
+        regs_.a = static_cast<uint8_t>(val); \
+        break; \
+    }
+
+#define REG_ARI_CY_MEM(NAME, OP) \
+    opcodes::NAME##_m: \
+    { \
+        uint16_t val = static_cast<uint16_t>(regs_.a) OP static_cast<uint16_t>(memory_[regs_.hl()]) OP static_cast<uint16_t>(flags_.c); \
+        flags_.set_zspc(val); \
+        regs_.a = static_cast<uint8_t>(val); \
+        break; \
+    }
+
 void
 cpu::step()
 {
@@ -279,6 +297,25 @@ cpu::step()
             ++pc_;
             break;
         }
+
+        case REG_ARI_CY(adc, a, +)
+        case REG_ARI_CY(adc, b, +)
+        case REG_ARI_CY(adc, c, +)
+        case REG_ARI_CY(adc, d, +)
+        case REG_ARI_CY(adc, e, +)
+        case REG_ARI_CY(adc, h, +)
+        case REG_ARI_CY(adc, l, +)
+        case REG_ARI_CY_MEM(adc, +)
+
+        case REG_ARI_CY(sbb, a, -)
+        case REG_ARI_CY(sbb, b, -)
+        case REG_ARI_CY(sbb, c, -)
+        case REG_ARI_CY(sbb, d, -)
+        case REG_ARI_CY(sbb, e, -)
+        case REG_ARI_CY(sbb, h, -)
+        case REG_ARI_CY(sbb, l, -)
+        case REG_ARI_CY_MEM(sbb, -)
+
     }
     ++pc_;
 }

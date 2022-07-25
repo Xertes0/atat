@@ -561,3 +561,249 @@ TEST(OpcodesTest, ArithmeticXRI)
     EXPECT_EQ(cpu.regs_.a,  0b01010);
     EXPECT_EQ(cpu.pc_, 2);
 }
+
+TEST(OpcodesTest, ArithmeticADC)
+{
+    uint8_t memory[] = {
+        atat::opcodes::adc_a,
+        atat::opcodes::adc_a,
+        atat::opcodes::adc_b,
+        atat::opcodes::adc_b,
+        atat::opcodes::adc_c,
+        atat::opcodes::adc_c,
+        atat::opcodes::adc_d,
+        atat::opcodes::adc_d,
+        atat::opcodes::adc_e,
+        atat::opcodes::adc_e,
+        atat::opcodes::adc_h,
+        atat::opcodes::adc_h,
+        atat::opcodes::adc_l,
+        atat::opcodes::adc_l,
+        atat::opcodes::adc_m,
+        atat::opcodes::adc_m,
+        0
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.regs_.a = 20;
+    cpu.flags_.c = 1;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 41);
+
+    cpu.regs_.a = 20;
+    cpu.flags_.c = 0;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 40);
+
+    cpu.regs_.a = 14;
+    cpu.regs_.b = 20;
+    cpu.flags_.c = 1;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 35);
+
+    cpu.regs_.a = 14;
+    cpu.regs_.b = 20;
+    cpu.flags_.c = 0;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 34);
+
+    cpu.regs_.a = 80;
+    cpu.regs_.c = 40;
+    cpu.flags_.c = 1;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 121);
+
+    cpu.regs_.a = 80;
+    cpu.regs_.c = 40;
+    cpu.flags_.c = 0;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 120);
+
+    cpu.regs_.a = 34;
+    cpu.regs_.d = 90;
+    cpu.flags_.c = 1;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 125);
+
+    cpu.regs_.a = 34;
+    cpu.regs_.d = 90;
+    cpu.flags_.c = 0;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 124);
+
+    cpu.regs_.a = 77;
+    cpu.regs_.e = 23;
+    cpu.flags_.c = 1;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 101);
+
+    cpu.regs_.a = 77;
+    cpu.regs_.e = 23;
+    cpu.flags_.c = 0;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 100);
+
+    cpu.regs_.a = 10;
+    cpu.regs_.h = 83;
+    cpu.flags_.c = 1;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 94);
+
+    cpu.regs_.a = 10;
+    cpu.regs_.h = 83;
+    cpu.flags_.c = 0;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 93);
+
+    cpu.regs_.a = 4;
+    cpu.regs_.l = 2;
+    cpu.flags_.c = 1;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 7);
+
+    cpu.regs_.a = 4;
+    cpu.regs_.l = 2;
+    cpu.flags_.c = 0;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 6);
+
+    memory[16] = 100;
+    cpu.regs_.a = 10;
+    cpu.regs_.h = 0;
+    cpu.regs_.l = 16;
+    cpu.flags_.c = 1;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 111);
+
+    memory[16] = 100;
+    cpu.regs_.a = 10;
+    cpu.regs_.h = 0;
+    cpu.regs_.l = 16;
+    cpu.flags_.c = 0;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 110);
+}
+
+TEST(OpcodesTest, ArithmeticSBB)
+{
+    uint8_t memory[] = {
+        atat::opcodes::sbb_a,
+        atat::opcodes::sbb_a,
+        atat::opcodes::sbb_b,
+        atat::opcodes::sbb_b,
+        atat::opcodes::sbb_c,
+        atat::opcodes::sbb_c,
+        atat::opcodes::sbb_d,
+        atat::opcodes::sbb_d,
+        atat::opcodes::sbb_e,
+        atat::opcodes::sbb_e,
+        atat::opcodes::sbb_h,
+        atat::opcodes::sbb_h,
+        atat::opcodes::sbb_l,
+        atat::opcodes::sbb_l,
+        atat::opcodes::sbb_m,
+        atat::opcodes::sbb_m,
+        0
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.regs_.a = 20;
+    cpu.flags_.c = 0;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 0);
+
+    cpu.regs_.a = 20;
+    cpu.flags_.c = 1;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 0xff);
+
+    cpu.regs_.a = 24;
+    cpu.regs_.b = 20;
+    cpu.flags_.c = 0;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 4);
+
+    cpu.regs_.a = 24;
+    cpu.regs_.b = 20;
+    cpu.flags_.c = 1;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 3);
+
+    cpu.regs_.a = 80;
+    cpu.regs_.c = 40;
+    cpu.flags_.c = 0;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 40);
+
+    cpu.regs_.a = 80;
+    cpu.regs_.c = 40;
+    cpu.flags_.c = 1;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 39);
+
+    cpu.regs_.a = 194;
+    cpu.regs_.d = 90;
+    cpu.flags_.c = 0;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 104);
+
+    cpu.regs_.a = 194;
+    cpu.regs_.d = 90;
+    cpu.flags_.c = 1;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 103);
+
+    cpu.regs_.a = 77;
+    cpu.regs_.e = 23;
+    cpu.flags_.c = 0;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 54);
+
+    cpu.regs_.a = 77;
+    cpu.regs_.e = 23;
+    cpu.flags_.c = 1;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 53);
+
+    cpu.regs_.a = 100;
+    cpu.regs_.h = 83;
+    cpu.flags_.c = 0;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 17);
+
+    cpu.regs_.a = 100;
+    cpu.regs_.h = 83;
+    cpu.flags_.c = 1;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 16);
+
+    cpu.regs_.a = 4;
+    cpu.regs_.l = 2;
+    cpu.flags_.c = 0;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 2);
+
+    cpu.regs_.a = 4;
+    cpu.regs_.l = 2;
+    cpu.flags_.c = 1;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 1);
+
+    memory[16] = 10;
+    cpu.regs_.a = 90;
+    cpu.regs_.h = 0;
+    cpu.regs_.l = 16;
+    cpu.flags_.c = 0;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 80);
+
+    memory[16] = 10;
+    cpu.regs_.a = 90;
+    cpu.regs_.h = 0;
+    cpu.regs_.l = 16;
+    cpu.flags_.c = 1;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 79);
+}
