@@ -235,6 +235,50 @@ cpu::step()
             ++pc_;
             break;
         }
+
+        case opcodes::sui_d8:
+        {
+            uint16_t val = static_cast<uint16_t>(regs_.a) - static_cast<uint16_t>(*(op+1));
+            flags_.set_zspc(val);
+            regs_.a = static_cast<uint8_t>(val);
+            ++pc_;
+            break;
+        }
+
+        case opcodes::cpi_d8:
+        {
+            uint16_t val = static_cast<uint16_t>(regs_.a) - static_cast<uint16_t>(*(op+1));
+            flags_.set_zspc(val);
+            ++pc_;
+            break;
+        }
+
+        case opcodes::ani_d8:
+        {
+            uint16_t val = static_cast<uint16_t>(regs_.a) & static_cast<uint16_t>(*(op+1));
+            flags_.set_zspc(val);
+            regs_.a = static_cast<uint8_t>(val);
+            ++pc_;
+            break;
+        }
+
+        case opcodes::ori_d8:
+        {
+            uint16_t val = static_cast<uint16_t>(regs_.a) | static_cast<uint16_t>(*(op+1));
+            flags_.set_zspc(val);
+            regs_.a = static_cast<uint8_t>(val);
+            ++pc_;
+            break;
+        }
+
+        case opcodes::xri_d8:
+        {
+            uint16_t val = static_cast<uint16_t>(regs_.a) ^ static_cast<uint16_t>(*(op+1));
+            flags_.set_zspc(val);
+            regs_.a = static_cast<uint8_t>(val);
+            ++pc_;
+            break;
+        }
     }
     ++pc_;
 }

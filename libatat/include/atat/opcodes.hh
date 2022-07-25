@@ -95,6 +95,16 @@ static constexpr inline uint8_t cmp_a {0xbf};
 
 static constexpr inline uint8_t adi_d8{0xc6};
 
+static constexpr inline uint8_t sui_d8{0xd6};
+
+static constexpr inline uint8_t ani_d8{0xe6};
+
+static constexpr inline uint8_t xri_d8{0xee};
+
+static constexpr inline uint8_t ori_d8{0xf6};
+
+static constexpr inline uint8_t cpi_d8{0xfe};
+
 } // namespace atat::opcodes
 
 } // namespace atat

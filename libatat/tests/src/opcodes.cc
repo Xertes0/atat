@@ -455,3 +455,109 @@ TEST(OpcodesTest, ArithmeticXRA)
     cpu.step();
     EXPECT_EQ(cpu.regs_.a, 0b1010);
 }
+
+TEST(OpcodesTest, ArithmeticADI)
+{
+    uint8_t memory[] = {
+        atat::opcodes::adi_d8,
+        0
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.regs_.a = 34;
+    memory[1]   = 23;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 57);
+    EXPECT_EQ(cpu.pc_, 2);
+}
+
+TEST(OpcodesTest, ArithmeticSUI)
+{
+    uint8_t memory[] = {
+        atat::opcodes::sui_d8,
+        0
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.regs_.a = 34;
+    memory[1]   = 23;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 11);
+    EXPECT_EQ(cpu.pc_, 2);
+}
+
+TEST(OpcodesTest, ArithmeticCPI)
+{
+    uint8_t memory[] = {
+        atat::opcodes::cpi_d8,
+        0,
+        atat::opcodes::cpi_d8,
+        0
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.regs_.a = 34;
+    memory[1]   = 34;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a,  34);
+    EXPECT_EQ(cpu.flags_.z, 1);
+    EXPECT_EQ(cpu.pc_, 2);
+
+    cpu.regs_.a = 23;
+    memory[3]   = 50;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a,  23);
+    EXPECT_EQ(cpu.flags_.z, 0);
+    EXPECT_EQ(cpu.pc_, 4);
+}
+
+TEST(OpcodesTest, ArithmeticANI)
+{
+    uint8_t memory[] = {
+        atat::opcodes::ani_d8,
+        0
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.regs_.a = 0b10011;
+    memory[1]   = 0b11001;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a,  0b10001);
+    EXPECT_EQ(cpu.pc_, 2);
+}
+
+TEST(OpcodesTest, ArithmeticORI)
+{
+    uint8_t memory[] = {
+        atat::opcodes::ori_d8,
+        0
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.regs_.a = 0b10011;
+    memory[1]   = 0b11001;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a,  0b11011);
+    EXPECT_EQ(cpu.pc_, 2);
+}
+
+TEST(OpcodesTest, ArithmeticXRI)
+{
+    uint8_t memory[] = {
+        atat::opcodes::xri_d8,
+        0
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.regs_.a = 0b10011;
+    memory[1]   = 0b11001;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a,  0b01010);
+    EXPECT_EQ(cpu.pc_, 2);
+}
