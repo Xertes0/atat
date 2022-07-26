@@ -45,13 +45,14 @@ static constexpr inline uint8_t inr_e {0x1c};
 static constexpr inline uint8_t dcr_e {0x1d};
 static constexpr inline uint8_t mvi_e {0x1e};
 
+static constexpr inline uint8_t shld  {0x22};
 static constexpr inline uint8_t inx_h {0x23};
 static constexpr inline uint8_t inr_h {0x24};
 static constexpr inline uint8_t dcr_h {0x25};
 static constexpr inline uint8_t mvi_h {0x26};
 
 static constexpr inline uint8_t dad_h {0x29};
-
+static constexpr inline uint8_t lhld  {0x2a};
 static constexpr inline uint8_t dcx_h {0x2b};
 static constexpr inline uint8_t inr_l {0x2c};
 static constexpr inline uint8_t dcr_l {0x2d};

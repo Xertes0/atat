@@ -426,6 +426,22 @@ cpu::step()
             break;
         }
 
+        case opcodes::lhld:
+        {
+            regs_.l = memory_[pc_ + 1];
+            regs_.h = memory_[pc_ + 2];
+            pc_ += 2;
+            break;
+        }
+
+        case opcodes::shld:
+        {
+            memory_[pc_ + 1] = regs_.l;
+            memory_[pc_ + 2] = regs_.h;
+            pc_ += 2;
+            break;
+        }
+
         case opcodes::sphl:
         {
             sp_ = regs_.hl();
