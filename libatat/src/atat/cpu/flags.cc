@@ -1,5 +1,6 @@
 #include "atat/cpu/flags.hh"
 
+#include <cstdint>
 #include <limits>
 
 #define Z() \
@@ -24,6 +25,20 @@ flags::flags() :
     p{0},
     c{0}/*,
     a{0}*/ {}
+
+uint8_t
+flags::bits()
+{
+    return
+        s << 7 |
+        z << 6 |
+        0 << 5 |
+        0 << 4 | // auxillary flag is not implemented
+        0 << 3 |
+        p << 2 |
+        1 << 1 |
+        c;
+}
 
 void
 flags::set_zspc(uint16_t val)

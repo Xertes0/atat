@@ -2,7 +2,7 @@
 
 /**
  * @file flags.hh
- * 
+ *
  * Cpu flags.
  */
 
@@ -21,7 +21,7 @@ struct flags
 	 * Set to 1 if result is zero.
 	 */
 	uint8_t z:1;
-	
+
 	/**
 	 * Sign bit.
 	 * Set to 1 if bit 7 is set.
@@ -50,8 +50,17 @@ struct flags
 	flags();
 
 	/**
+	 * Returns flags as bits.
+	 * Format: SZ0A0P1C
+	 *
+	 * @return uint8_t
+	 */
+	uint8_t
+	bits();
+
+	/**
 	 * Sets z,s,p,c flags based on the value.
-	 * 
+	 *
 	 * @param val Instruction result
 	 */
 	void
@@ -59,7 +68,7 @@ struct flags
 
 	/**
 	 * Sets z,s,p flags based on the value.
-	 * 
+	 *
 	 * @param val Instruction result
 	 */
 	void
@@ -67,7 +76,7 @@ struct flags
 
 	/**
 	 * Sets c flag based on the value.
-	 * 
+	 *
 	 * @param val Instruction result
 	 */
 	void

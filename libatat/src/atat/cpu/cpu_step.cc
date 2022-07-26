@@ -1,5 +1,6 @@
 #include "atat/cpu/cpu.hh"
 #include "atat/opcodes.hh"
+#include <cstdint>
 
 #define REG_ARI(NAME,REG, OP) \
     opcodes::NAME##_##REG: \
@@ -264,6 +265,15 @@
         break; \
     }
 
+#define PUSH(A, B) \
+    opcodes::push_##A: \
+    { \
+        memory_[sp_-1] = regs_.A; \
+        memory_[sp_-2] = regs_.B; \
+        sp_ -= 2; \
+        break; \
+    }
+
 #define JMP() \
     pc_ = ((static_cast<uint16_t>(memory_[pc_ + 2]) << 8) | memory_[pc_ + 1]) - 1;
 
@@ -433,6 +443,18 @@ cpu::step()
 
         case STAX(b, bc)
         case STAX(d, de)
+
+        case PUSH(b, c);
+        case PUSH(d, e);
+        case PUSH(h, l);
+
+        case opcodes::push_psw:
+        {
+            memory_[sp_-2] = flags_.bits();
+            memory_[sp_-1] = regs_.a;
+            sp_ -= 2;
+            break;
+        }
 
         case opcodes::pchl:
         {

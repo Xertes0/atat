@@ -35,3 +35,13 @@ TEST(FlagsTest, ParityNegative)
     flags.set_zspc(0b101111);
     EXPECT_EQ(flags.p, 0);
 }
+
+TEST(FlagsTest, Bits)
+{
+    auto flags = atat::flags{};
+    flags.s = 1;
+    flags.z = 0;
+    flags.p = 1;
+    flags.c = 0;
+    EXPECT_EQ(flags.bits(), 0b10000110);
+}

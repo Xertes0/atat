@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <gtest/gtest.h>
 
 #define private public
@@ -44,4 +45,47 @@ TEST(OpcodesTest, Stack_XTHL)
     EXPECT_EQ(cpu.regs_.l, 0xcd);
     EXPECT_EQ(memory[3],   0x34);
     EXPECT_EQ(memory[2],   0x12);
+}
+
+#define PUSH(A, B) \
+    TEST(OpcodesTest, Stack_PUSH_##A) \
+    { \
+        uint8_t memory[] { \
+            atat::opcodes::push_##A, \
+            0, \
+            0 \
+        }; \
+        auto cpu = atat::cpu{memory}; \
+        cpu.sp_ = 3; \
+        cpu.regs_.set_##A##B(0x1f27); \
+        cpu.step(); \
+        EXPECT_EQ(memory[1], 0x27); \
+        EXPECT_EQ(memory[2], 0x1f); \
+        EXPECT_EQ(cpu.sp_, 1); \
+    }
+
+PUSH(b, c)
+PUSH(d, e)
+PUSH(h, l)
+
+TEST(OpcodesTest, Stack_PUSH_PSW)
+{
+    uint8_t memory[] {
+        atat::opcodes::push_psw,
+        0,
+        0
+    };
+
+    auto cpu = atat::cpu{memory};
+    cpu.sp_ = 3;
+
+    cpu.flags_.s = 1;
+    cpu.flags_.z = 0;
+    cpu.flags_.p = 1;
+    cpu.flags_.c = 0;
+    cpu.regs_.a = 0x1f;
+    cpu.step();
+    EXPECT_EQ(memory[1], 0b10000110);
+    EXPECT_EQ(memory[2], 0x1f);
+    EXPECT_EQ(cpu.sp_, 1);
 }

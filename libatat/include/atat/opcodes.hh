@@ -211,7 +211,7 @@ static constexpr inline uint8_t rnz   {0xc0};
 static constexpr inline uint8_t jnz   {0xc2};
 static constexpr inline uint8_t jmp   {0xc3};
 static constexpr inline uint8_t cnz   {0xc4};
-
+static constexpr inline uint8_t push_b{0xc5};
 static constexpr inline uint8_t adi_d8{0xc6};
 
 static constexpr inline uint8_t rz    {0xc8};
@@ -227,7 +227,7 @@ static constexpr inline uint8_t rnc   {0xd0};
 static constexpr inline uint8_t jnc   {0xd2};
 
 static constexpr inline uint8_t cnc   {0xd4};
-
+static constexpr inline uint8_t push_d{0xd5};
 static constexpr inline uint8_t sui_d8{0xd6};
 
 static constexpr inline uint8_t rc    {0xd8};
@@ -243,7 +243,7 @@ static constexpr inline uint8_t rpo   {0xe0};
 static constexpr inline uint8_t jpo   {0xe2};
 static constexpr inline uint8_t xthl  {0xe3};
 static constexpr inline uint8_t cpo   {0xe4};
-
+static constexpr inline uint8_t push_h{0xe5};
 static constexpr inline uint8_t ani_d8{0xe6};
 
 static constexpr inline uint8_t rpe   {0xe8};
@@ -259,7 +259,7 @@ static constexpr inline uint8_t rp    {0xf0};
 static constexpr inline uint8_t jp    {0xf2};
 static constexpr inline uint8_t di    {0xf3};
 static constexpr inline uint8_t cp    {0xf4};
-
+static constexpr inline uint8_t push_psw{0xf5};
 static constexpr inline uint8_t ori_d8{0xf6};
 
 static constexpr inline uint8_t rm    {0xf8};
