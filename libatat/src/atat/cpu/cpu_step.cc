@@ -244,6 +244,26 @@
         break; \
     }
 
+#define LXI(A,B) \
+    opcodes::lxi_##A: \
+    { \
+        regs_.A = memory_[pc_+2]; \
+        regs_.B = memory_[pc_+1]; \
+        pc_ += 2; \
+        break; \
+    }
+
+#define LXI_COMBO() \
+    case LXI(b, c) \
+    case LXI(d, e) \
+    case LXI(h, l) \
+    case opcodes::lxi_sp: \
+    { \
+        sp_ = (static_cast<int16_t>(memory_[pc_+2]) << 8) | memory_[pc_+1]; \
+        pc_ += 2; \
+        break; \
+    }
+
 #define JMP() \
     pc_ = ((static_cast<uint16_t>(memory_[pc_ + 2]) << 8) | memory_[pc_ + 1]) - 1;
 
@@ -405,6 +425,8 @@ cpu::step()
         MOV_COMBO_COMBO()
 
         REG_MVI_COMBO()
+
+        LXI_COMBO()
 
         case LDAX(b, bc)
         case LDAX(d, de)

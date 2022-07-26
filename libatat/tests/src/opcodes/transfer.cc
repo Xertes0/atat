@@ -133,3 +133,33 @@ TEST(OpcodesTest, Transfer_SHLD)
     EXPECT_EQ(memory[1], 0x8a);
     EXPECT_EQ(memory[2], 0x23);
 }
+
+#define LXI(A,B) \
+    TEST(OpcodesTest, Transfer_LXI_##A) \
+    { \
+        uint8_t memory[] { \
+            atat::opcodes::lxi_##A, \
+            0xcf, \
+            0x28 \
+        }; \
+        auto cpu = atat::cpu{memory}; \
+        cpu.step(); \
+        EXPECT_EQ(cpu.regs_.A, 0x28); \
+        EXPECT_EQ(cpu.regs_.B, 0xcf); \
+    }
+
+LXI(b, c)
+LXI(d, e)
+LXI(h, l)
+
+TEST(OpcodesTest, Transfer_LXI_sp)
+{
+    uint8_t memory[] {
+        atat::opcodes::lxi_sp,
+        0xcf,
+        0x28
+    };
+    auto cpu = atat::cpu{memory};
+    cpu.step();
+    EXPECT_EQ(cpu.sp_, 0x28cf);
+}
