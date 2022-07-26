@@ -553,6 +553,12 @@ cpu::step()
             return;
         }
 
+        //case opcodes::cma:
+        //{
+        //    flags_.a = !flags_.a;
+        //    return;
+        //}
+
         case opcodes::ral:
         {
             auto prev_c = flags_.c;
