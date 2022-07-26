@@ -11,10 +11,12 @@ int main(int argc, char const** argv)
 {
 	std::cout << "Hello world\n";
 
-	auto memory = atat::disassemble(std::string_view{argv[1]});
+	auto memory = atat::memory_with_rom(std::string_view{argv[1]});
 	auto cpu = atat::cpu{memory.data()};
 
-	cpu.step();
+	while (true) {
+		cpu.step();
+	}
 
 	//int i = 8;
 	//while(i--) {

@@ -15,12 +15,12 @@ namespace atat
 
 // TODO Rename to 'load_rom'??
 /**
- * Disassemble ROM file at given path.
+ * Allocate memory with rom.
  *
  * @param path Path to ROM file.
- * @return std::vector<uint8_t> 
+ * @return std::vector<uint8_t>
  */
 std::vector<uint8_t>
-disassemble(std::string_view path);
+memory_with_rom(std::string_view path);
 
 } // namespace atat
