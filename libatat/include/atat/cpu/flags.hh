@@ -64,7 +64,7 @@ struct flags
 	 *
 	 * @param bits
 	 */
-	uint8_t
+	void
 	set_from_bits(uint8_t bits);
 
 	/**

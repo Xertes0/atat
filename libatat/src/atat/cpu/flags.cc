@@ -40,7 +40,7 @@ flags::bits()
         c;
 }
 
-uint8_t
+void
 flags::set_from_bits(uint8_t bits)
 {
     s = (bits >> 7) & 1;
