@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <gtest/gtest.h>
 
 #define private public
@@ -84,3 +85,51 @@
     MOV_COMBO(a)
 
 MOV_COMBO_COMBO()
+
+#define MVI(DST) \
+    TEST(OpcodesTest, MVI_##DST) \
+    { \
+        uint8_t memory[] { \
+            atat::opcodes::mvi_##DST, \
+            0, \
+            atat::opcodes::mvi_##DST, \
+            0 \
+        }; \
+        auto cpu = atat::cpu{memory}; \
+        memory[1] = 0x23; \
+        cpu.step(); \
+        EXPECT_EQ(cpu.regs_.DST, 0x23); \
+        memory[3] = 0xf2; \
+        cpu.step(); \
+        EXPECT_EQ(cpu.regs_.DST, 0xf2); \
+    }
+
+#define MVI_MEM() \
+    TEST(OpcodesTest, MVI_m) \
+    { \
+        uint8_t memory[] { \
+            atat::opcodes::mvi_m, \
+            0, \
+            atat::opcodes::mvi_m, \
+            0 \
+        }; \
+        auto cpu = atat::cpu{memory}; \
+        memory[1] = 0x23; \
+        cpu.step(); \
+        EXPECT_EQ(cpu.regs_.hl(), 0x23); \
+        memory[3] = 0xf2; \
+        cpu.step(); \
+        EXPECT_EQ(cpu.regs_.hl(), 0xf2); \
+    }
+
+#define MVI_COMBO() \
+    MVI(b) \
+    MVI(c) \
+    MVI(d) \
+    MVI(e) \
+    MVI(h) \
+    MVI(l) \
+    MVI(a) \
+    MVI_MEM()
+
+MVI_COMBO()

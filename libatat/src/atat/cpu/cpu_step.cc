@@ -107,6 +107,7 @@
         ++pc_; \
         break; \
     }
+
 #define REG_LOG_COMBO(NAME, OP) \
     case REG_LOG(NAME, a, OP) \
     case REG_LOG(NAME, b, OP) \
@@ -201,6 +202,29 @@
     { \
         uint16_t val = static_cast<uint16_t>(regs_.a) - static_cast<uint16_t>(*(op+1)); \
         flags_.set_zspc(val); \
+        ++pc_; \
+        break; \
+    }
+
+#define REG_MVI(DST) \
+    opcodes::mvi_##DST: \
+    { \
+        regs_.DST = memory_[pc_+1]; \
+        ++pc_; \
+        break; \
+    }
+
+#define REG_MVI_COMBO() \
+    case REG_MVI(b) \
+    case REG_MVI(c) \
+    case REG_MVI(d) \
+    case REG_MVI(e) \
+    case REG_MVI(h) \
+    case REG_MVI(l) \
+    case REG_MVI(a) \
+    case opcodes::mvi_m: \
+    { \
+        regs_.set_hl(memory_[pc_+1]); \
         ++pc_; \
         break; \
     }
@@ -363,6 +387,10 @@ cpu::step()
         MAKE_JCR_COMBO(call, c, CALL)
         MAKE_JCR_COMBO(ret,  r, RET)
 
+        MOV_COMBO_COMBO()
+
+        REG_MVI_COMBO()
+
         case opcodes::sphl:
         {
             sp_ = regs_.hl();
@@ -406,8 +434,6 @@ cpu::step()
             int_enable_ = true;
             break;
         }
-
-        MOV_COMBO_COMBO()
 
     }
     ++pc_;
