@@ -25,7 +25,7 @@ static constexpr inline uint8_t inr_b {0x04};
 static constexpr inline uint8_t dcr_b {0x05};
 static constexpr inline uint8_t mvi_b {0x06};
 static constexpr inline uint8_t rlc   {0x07};
-// NOP
+static constexpr inline uint8_t nop1  {0x08};
 static constexpr inline uint8_t dad_b {0x09};
 static constexpr inline uint8_t ldax_b{0x0a};
 static constexpr inline uint8_t dcx_b {0x0b};
@@ -33,7 +33,7 @@ static constexpr inline uint8_t inr_c {0x0c};
 static constexpr inline uint8_t dcr_c {0x0d};
 static constexpr inline uint8_t mvi_c {0x0e};
 static constexpr inline uint8_t rrc   {0x0f};
-// NOP
+static constexpr inline uint8_t nop2  {0x10};
 static constexpr inline uint8_t lxi_d {0x11};
 static constexpr inline uint8_t stax_d{0x12};
 static constexpr inline uint8_t inx_d {0x13};
@@ -41,7 +41,7 @@ static constexpr inline uint8_t inr_d {0x14};
 static constexpr inline uint8_t dcr_d {0x15};
 static constexpr inline uint8_t mvi_d {0x16};
 static constexpr inline uint8_t ral   {0x17};
-// NOP
+static constexpr inline uint8_t nop3  {0x18};
 static constexpr inline uint8_t dad_d {0x19};
 static constexpr inline uint8_t ldax_d{0x1a};
 static constexpr inline uint8_t dcx_d {0x1b};
@@ -49,7 +49,7 @@ static constexpr inline uint8_t inr_e {0x1c};
 static constexpr inline uint8_t dcr_e {0x1d};
 static constexpr inline uint8_t mvi_e {0x1e};
 static constexpr inline uint8_t rar   {0x1f};
-// NOP
+static constexpr inline uint8_t nop4  {0x20};
 static constexpr inline uint8_t lxi_h {0x21};
 static constexpr inline uint8_t shld  {0x22};
 static constexpr inline uint8_t inx_h {0x23};
@@ -57,7 +57,7 @@ static constexpr inline uint8_t inr_h {0x24};
 static constexpr inline uint8_t dcr_h {0x25};
 static constexpr inline uint8_t mvi_h {0x26};
 //static constexpr inline uint8_t daa   {0x27};
-// NOP
+static constexpr inline uint8_t nop5  {0x28};
 static constexpr inline uint8_t dad_h {0x29};
 static constexpr inline uint8_t lhld  {0x2a};
 static constexpr inline uint8_t dcx_h {0x2b};
@@ -65,7 +65,7 @@ static constexpr inline uint8_t inr_l {0x2c};
 static constexpr inline uint8_t dcr_l {0x2d};
 static constexpr inline uint8_t mvi_l {0x2e};
 //static constexpr inline uint8_t cma   {0x2f}; // auxillary flag not implemented
-// NOP
+static constexpr inline uint8_t nop6  {0x30};
 static constexpr inline uint8_t lxi_sp{0x31};
 static constexpr inline uint8_t sta   {0x32};
 static constexpr inline uint8_t inx_sp{0x33};
@@ -73,7 +73,7 @@ static constexpr inline uint8_t inr_m {0x34};
 static constexpr inline uint8_t dcr_m {0x35};
 static constexpr inline uint8_t mvi_m {0x36};
 static constexpr inline uint8_t stc   {0x37};
-// NOP
+static constexpr inline uint8_t nop7  {0x38};
 static constexpr inline uint8_t dad_sp{0x39};
 static constexpr inline uint8_t lda   {0x3a};
 static constexpr inline uint8_t dcx_sp{0x3b};
@@ -220,7 +220,7 @@ static constexpr inline uint8_t adi_d8{0xc6};
 static constexpr inline uint8_t rz    {0xc8};
 static constexpr inline uint8_t ret   {0xc9};
 static constexpr inline uint8_t jz    {0xca};
-// NOP
+static constexpr inline uint8_t nop8  {0xcb};
 static constexpr inline uint8_t cz    {0xcc};
 static constexpr inline uint8_t call  {0xcd};
 static constexpr inline uint8_t aci_d8{0xce};
@@ -228,17 +228,17 @@ static constexpr inline uint8_t aci_d8{0xce};
 static constexpr inline uint8_t rnc   {0xd0};
 static constexpr inline uint8_t pop_d {0xd1};
 static constexpr inline uint8_t jnc   {0xd2};
-
+static constexpr inline uint8_t out   {0xd3};
 static constexpr inline uint8_t cnc   {0xd4};
 static constexpr inline uint8_t push_d{0xd5};
 static constexpr inline uint8_t sui_d8{0xd6};
 
 static constexpr inline uint8_t rc    {0xd8};
-// NOP
+static constexpr inline uint8_t nop9  {0xd9};
 static constexpr inline uint8_t jc    {0xda};
-
+static constexpr inline uint8_t in    {0xdb};
 static constexpr inline uint8_t cc    {0xdc};
-// NOP
+static constexpr inline uint8_t nop10 {0xdd};
 static constexpr inline uint8_t sbi_d8{0xde};
 
 static constexpr inline uint8_t rpo   {0xe0};
@@ -254,7 +254,7 @@ static constexpr inline uint8_t pchl  {0xe9};
 static constexpr inline uint8_t jpe   {0xea};
 static constexpr inline uint8_t xchg  {0xeb};
 static constexpr inline uint8_t cpe   {0xec};
-// NOP
+static constexpr inline uint8_t nop11 {0xed};
 static constexpr inline uint8_t xri_d8{0xee};
 
 static constexpr inline uint8_t rp    {0xf0};
@@ -270,7 +270,7 @@ static constexpr inline uint8_t sphl  {0xf9};
 static constexpr inline uint8_t jm    {0xfa};
 static constexpr inline uint8_t ei    {0xfb};
 static constexpr inline uint8_t cm    {0xfc};
-// NOP
+static constexpr inline uint8_t nop12 {0xfd};
 static constexpr inline uint8_t cpi_d8{0xfe};
 
 } // namespace atat::opcodes

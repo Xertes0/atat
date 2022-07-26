@@ -14,14 +14,10 @@ int main(int argc, char const** argv)
 	auto memory = atat::memory_with_rom(std::string_view{argv[1]});
 	auto cpu = atat::cpu{memory.data()};
 
+	std::cout << "Running\n";
 	while (true) {
 		cpu.step();
 	}
-
-	//int i = 8;
-	//while(i--) {
-	//	std::cout << std::hex << static_cast<int>(contents[7-i]) << '\n';
-	//}
 
 	return 0;
 }

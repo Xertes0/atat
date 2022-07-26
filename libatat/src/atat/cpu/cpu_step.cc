@@ -404,7 +404,22 @@ cpu::step()
             break;
         }
 
+        case opcodes::out: break;
+        case opcodes::in:  break;
+
         case opcodes::nop: break;
+        case opcodes::nop1: break;
+        case opcodes::nop2: break;
+        case opcodes::nop3: break;
+        case opcodes::nop4: break;
+        case opcodes::nop5: break;
+        case opcodes::nop6: break;
+        case opcodes::nop7: break;
+        case opcodes::nop8: break;
+        case opcodes::nop9: break;
+        case opcodes::nop10: break;
+        case opcodes::nop11: break;
+        case opcodes::nop12: break;
 
         REG_ARI_COMBO(add, +)
         REG_ARI_COMBO(sub, -)
