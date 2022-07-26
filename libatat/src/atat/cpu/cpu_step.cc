@@ -553,6 +553,40 @@ cpu::step()
             return;
         }
 
+        case opcodes::ral:
+        {
+            auto prev_c = flags_.c;
+            flags_.c = regs_.a >> 7;
+            regs_.a <<= 1;
+            regs_.a |= prev_c & 1;
+            break;
+        }
+
+        case opcodes::rar:
+        {
+            auto prev_c = flags_.c;
+            flags_.c = regs_.a & 1;
+            regs_.a >>= 1;
+            regs_.a |= (static_cast<uint8_t>(prev_c) << 7);
+            break;
+        }
+
+        case opcodes::rlc:
+        {
+            flags_.c = (regs_.a >> 7) & 1;
+            regs_.a <<= 1;
+            regs_.a |= flags_.c;
+            break;
+        }
+
+        case opcodes::rrc:
+        {
+            flags_.c = regs_.a & 1;
+            regs_.a >>= 1;
+            regs_.a |= static_cast<uint8_t>(flags_.c) << 7;
+            break;
+        }
+
         case opcodes::di:
         {
             int_enable_ = false;
