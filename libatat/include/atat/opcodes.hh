@@ -247,9 +247,9 @@ static constexpr inline uint8_t cpo   {0xe4};
 static constexpr inline uint8_t ani_d8{0xe6};
 
 static constexpr inline uint8_t rpe   {0xe8};
-
+static constexpr inline uint8_t pchl  {0xe9};
 static constexpr inline uint8_t jpe   {0xea};
-
+static constexpr inline uint8_t xchg  {0xeb};
 static constexpr inline uint8_t cpe   {0xec};
 
 static constexpr inline uint8_t xri_d8{0xee};

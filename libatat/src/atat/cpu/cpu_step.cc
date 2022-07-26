@@ -434,6 +434,20 @@ cpu::step()
         case STAX(b, bc)
         case STAX(d, de)
 
+        case opcodes::pchl:
+        {
+            pc_ = regs_.hl() - 1;
+            break;
+        }
+
+        case opcodes::xchg:
+        {
+            auto hl = regs_.hl();
+            regs_.set_hl(regs_.de());
+            regs_.set_de(hl);
+            break;
+        }
+
         case opcodes::lda:
         {
             regs_.a = memory_[(static_cast<uint16_t>(memory_[pc_+2]) << 8) | memory_[pc_+1]];

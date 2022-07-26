@@ -163,3 +163,31 @@ TEST(OpcodesTest, Transfer_LXI_sp)
     cpu.step();
     EXPECT_EQ(cpu.sp_, 0x28cf);
 }
+
+TEST(OpcodesTest, Transfer_PCHL)
+{
+    uint8_t memory[] {
+        atat::opcodes::pchl,
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.regs_.set_hl(0xf4e5);
+    cpu.step();
+    EXPECT_EQ(cpu.pc_, 0xf4e5);
+}
+
+TEST(OpcodesTest, Transfer_XCHG)
+{
+    uint8_t memory[] {
+        atat::opcodes::xchg,
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.regs_.set_hl(0xf4e5);
+    cpu.regs_.set_de(0x1234);
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.hl(), 0x1234);
+    EXPECT_EQ(cpu.regs_.de(), 0xf4e5);
+}
