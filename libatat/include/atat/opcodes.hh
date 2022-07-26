@@ -19,25 +19,27 @@ namespace opcodes
 
 static constexpr inline uint8_t nop   {0x00};
 
+static constexpr inline uint8_t stax_b{0x02};
 static constexpr inline uint8_t inx_b {0x03};
 static constexpr inline uint8_t inr_b {0x04};
 static constexpr inline uint8_t dcr_b {0x05};
 static constexpr inline uint8_t mvi_b {0x06};
 
 static constexpr inline uint8_t dad_b {0x09};
-
+static constexpr inline uint8_t ldax_b{0x0a};
 static constexpr inline uint8_t dcx_b {0x0b};
 static constexpr inline uint8_t inr_c {0x0c};
 static constexpr inline uint8_t dcr_c {0x0d};
 static constexpr inline uint8_t mvi_c {0x0e};
 
+static constexpr inline uint8_t stax_d{0x12};
 static constexpr inline uint8_t inx_d {0x13};
 static constexpr inline uint8_t inr_d {0x14};
 static constexpr inline uint8_t dcr_d {0x15};
 static constexpr inline uint8_t mvi_d {0x16};
 
 static constexpr inline uint8_t dad_d {0x19};
-
+static constexpr inline uint8_t ldax_d{0x1a};
 static constexpr inline uint8_t dcx_d {0x1b};
 static constexpr inline uint8_t inr_e {0x1c};
 static constexpr inline uint8_t dcr_e {0x1d};

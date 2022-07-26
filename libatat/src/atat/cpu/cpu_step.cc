@@ -230,6 +230,20 @@
         break; \
     }
 
+#define LDAX(NAME, FUN) \
+    opcodes::ldax_##NAME: \
+    { \
+        regs_.a = memory_[regs_.FUN()]; \
+        break; \
+    }
+
+#define STAX(NAME, FUN) \
+    opcodes::stax_##NAME: \
+    { \
+        memory_[regs_.FUN()] = regs_.a; \
+        break; \
+    }
+
 #define JMP() \
     pc_ = ((static_cast<uint16_t>(memory_[pc_ + 2]) << 8) | memory_[pc_ + 1]) - 1;
 
@@ -391,6 +405,12 @@ cpu::step()
         MOV_COMBO_COMBO()
 
         REG_MVI_COMBO()
+
+        case LDAX(b, bc)
+        case LDAX(d, de)
+
+        case STAX(b, bc)
+        case STAX(d, de)
 
         case opcodes::lda:
         {
