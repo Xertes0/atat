@@ -55,6 +55,7 @@ static constexpr inline uint8_t inr_l {0x2c};
 static constexpr inline uint8_t dcr_l {0x2d};
 static constexpr inline uint8_t mvi_l {0x2e};
 
+static constexpr inline uint8_t sta   {0x32};
 static constexpr inline uint8_t inx_sp{0x33};
 static constexpr inline uint8_t inr_m {0x34};
 static constexpr inline uint8_t dcr_m {0x35};
@@ -63,7 +64,7 @@ static constexpr inline uint8_t mvi_m {0x36};
 static constexpr inline uint8_t stc   {0x37};
 
 static constexpr inline uint8_t dad_sp{0x39};
-
+static constexpr inline uint8_t lda   {0x3a};
 static constexpr inline uint8_t dcx_sp{0x3b};
 static constexpr inline uint8_t inr_a {0x3c};
 static constexpr inline uint8_t dcr_a {0x3d};

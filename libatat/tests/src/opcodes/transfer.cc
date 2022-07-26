@@ -133,3 +133,34 @@ MOV_COMBO_COMBO()
     MVI_MEM()
 
 MVI_COMBO()
+
+TEST(OpcodesTest, Transfer_LDA)
+{
+    uint8_t memory[] {
+        atat::opcodes::lda,
+        3,
+        0,
+        0xef
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 0xef);
+}
+
+TEST(OpcodesTest, Transfer_STA)
+{
+    uint8_t memory[] {
+        atat::opcodes::sta,
+        3,
+        0,
+        0
+    };
+
+    auto cpu = atat::cpu{memory};
+
+    cpu.regs_.a = 23;
+    cpu.step();
+    EXPECT_EQ(cpu.regs_.a, 23);
+}

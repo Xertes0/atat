@@ -1,4 +1,5 @@
 #include "atat/cpu/cpu.hh"
+#include "atat/opcodes.hh"
 
 #define REG_ARI(NAME,REG, OP) \
     opcodes::NAME##_##REG: \
@@ -390,6 +391,20 @@ cpu::step()
         MOV_COMBO_COMBO()
 
         REG_MVI_COMBO()
+
+        case opcodes::lda:
+        {
+            regs_.a = memory_[(static_cast<uint16_t>(memory_[pc_+2]) << 8) | memory_[pc_+1]];
+            pc_ += 2;
+            break;
+        }
+
+        case opcodes::sta:
+        {
+            memory_[(static_cast<uint16_t>(memory_[pc_+2]) << 8) | memory_[pc_+1]] = regs_.a;
+            pc_ += 2;
+            break;
+        }
 
         case opcodes::sphl:
         {
