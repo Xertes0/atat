@@ -64,6 +64,22 @@ TEST(OpcodesTest, Stack_XTHL)
         EXPECT_EQ(cpu.sp_, 1); \
     }
 
+
+#define POP(A, B) \
+    TEST(OpcodesTest, Stack_POP_##A) \
+    { \
+        uint8_t memory[] { \
+            atat::opcodes::pop_##A, \
+            0x27, \
+            0x1f \
+        }; \
+        auto cpu = atat::cpu{memory}; \
+        cpu.sp_ = 1; \
+        cpu.step(); \
+        EXPECT_EQ(cpu.regs_.A##B(), 0x1f27); \
+        EXPECT_EQ(cpu.sp_, 3); \
+    }
+
 PUSH(b, c)
 PUSH(d, e)
 PUSH(h, l)
@@ -88,4 +104,25 @@ TEST(OpcodesTest, Stack_PUSH_PSW)
     EXPECT_EQ(memory[1], 0b10000110);
     EXPECT_EQ(memory[2], 0x1f);
     EXPECT_EQ(cpu.sp_, 1);
+}
+
+POP(b, c)
+POP(d, e)
+POP(h, l)
+
+TEST(OpcodesTest, Stack_POP_PSW)
+{
+    uint8_t memory[] {
+        atat::opcodes::pop_psw,
+        0b10000110,
+        0x1f
+    };
+
+    auto cpu = atat::cpu{memory};
+    cpu.sp_ = 1;
+
+    cpu.step();
+    EXPECT_EQ(cpu.flags_.bits(), 0b10000110);
+    EXPECT_EQ(cpu.regs_.a, 0x1f);
+    EXPECT_EQ(cpu.sp_, 3);
 }

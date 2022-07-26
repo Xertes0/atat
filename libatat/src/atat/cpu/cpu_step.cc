@@ -274,6 +274,15 @@
         break; \
     }
 
+#define POP(A, B) \
+    opcodes::pop_##A: \
+    { \
+        regs_.A = memory_[sp_+1]; \
+        regs_.B = memory_[sp_]; \
+        sp_ += 2; \
+        break; \
+    }
+
 #define JMP() \
     pc_ = ((static_cast<uint16_t>(memory_[pc_ + 2]) << 8) | memory_[pc_ + 1]) - 1;
 
@@ -453,6 +462,18 @@ cpu::step()
             memory_[sp_-2] = flags_.bits();
             memory_[sp_-1] = regs_.a;
             sp_ -= 2;
+            break;
+        }
+
+        case POP(b, c);
+        case POP(d, e);
+        case POP(h, l);
+
+        case opcodes::pop_psw:
+        {
+            flags_.set_from_bits(memory_[sp_]);
+            regs_.a = memory_[sp_+1];
+            sp_ += 2;
             break;
         }
 

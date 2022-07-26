@@ -59,6 +59,15 @@ struct flags
 	bits();
 
 	/**
+	 * Sets flags from bits.
+	 * Format: SZ0A0P1C
+	 *
+	 * @param bits
+	 */
+	uint8_t
+	set_from_bits(uint8_t bits);
+
+	/**
 	 * Sets z,s,p,c flags based on the value.
 	 *
 	 * @param val Instruction result

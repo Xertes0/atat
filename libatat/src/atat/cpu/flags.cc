@@ -40,6 +40,16 @@ flags::bits()
         c;
 }
 
+uint8_t
+flags::set_from_bits(uint8_t bits)
+{
+    s = (bits >> 7) & 1;
+    z = (bits >> 6) & 1;
+//  a = (bits >> 4) & 1;
+    p = (bits >> 2) & 1;
+    c =  bits       & 1;
+}
+
 void
 flags::set_zspc(uint16_t val)
 {

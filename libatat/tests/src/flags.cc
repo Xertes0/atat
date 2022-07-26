@@ -45,3 +45,14 @@ TEST(FlagsTest, Bits)
     flags.c = 0;
     EXPECT_EQ(flags.bits(), 0b10000110);
 }
+
+TEST(FlagsTest, SetBits)
+{
+    auto flags = atat::flags{};
+    flags.set_from_bits(0b10000110);
+
+    EXPECT_EQ(flags.s,  1);
+    EXPECT_EQ(flags.z,  0);
+    EXPECT_EQ(flags.p,  1);
+    EXPECT_EQ(flags.c,  0);
+}
