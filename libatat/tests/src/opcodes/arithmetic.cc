@@ -1,9 +1,6 @@
 #include <gtest/gtest.h>
 
-#define private public
 #include <atat/cpu/cpu.hh>
-#undef private
-
 #include <atat/opcodes.hh>
 
 // TODO Check flags

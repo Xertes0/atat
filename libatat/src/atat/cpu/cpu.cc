@@ -1,16 +1,16 @@
 #include "atat/cpu/cpu.hh"
-#include "atat/exceptions.hh"
-#include "atat/opcodes.hh"
 
 namespace atat
 {
 
 cpu::cpu(uint8_t* memory) :
-    regs_{},
+    registers{},
     sp_{},
     pc_{},
-    memory_{memory},
-    flags_{},
-    int_enable_{} {}
+    memory{memory},
+    flags{},
+    regs_{this},
+    flags_{this},
+    int_enabled_{} {}
 
 } // namespace atat

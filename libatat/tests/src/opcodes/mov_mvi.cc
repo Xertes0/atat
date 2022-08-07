@@ -28,15 +28,17 @@
     { \
         uint8_t memory[] = { \
             atat::opcodes::mov_##DST##m, \
-            atat::opcodes::mov_##DST##m \
+            atat::opcodes::mov_##DST##m, \
+            0xac, \
+            0x4f \
         }; \
         auto cpu = atat::cpu{memory}; \
-        cpu.regs_.set_hl(83); \
+        cpu.regs_.set_hl(2); \
         cpu.step(); \
-        EXPECT_EQ(cpu.regs_.DST, 83); \
-        cpu.regs_.set_hl(12); \
+        EXPECT_EQ(cpu.regs_.DST, 0xac); \
+        cpu.regs_.set_hl(3); \
         cpu.step(); \
-        EXPECT_EQ(cpu.regs_.DST, 12); \
+        EXPECT_EQ(cpu.regs_.DST, 0x4f); \
     }
 
 #define MOV_TMEM(SRC) \

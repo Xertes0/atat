@@ -20,6 +20,7 @@ TEST(OpcodesTest, Transfer_LDA)
 
     cpu.step();
     EXPECT_EQ(cpu.regs_.a, 0xef);
+    EXPECT_EQ(cpu.pc_, 3);
 }
 
 TEST(OpcodesTest, Transfer_STA)
@@ -35,7 +36,8 @@ TEST(OpcodesTest, Transfer_STA)
 
     cpu.regs_.a = 23;
     cpu.step();
-    EXPECT_EQ(cpu.regs_.a, 23);
+    EXPECT_EQ(memory[3], 23);
+    EXPECT_EQ(cpu.pc_, 3);
 }
 
 TEST(OpcodesTest, Transfer_LDAX_B)
@@ -106,6 +108,8 @@ TEST(OpcodesTest, Transfer_LHLD)
 {
     uint8_t memory[] {
         atat::opcodes::lhld,
+        0x3,
+        0x0,
         0x8a,
         0x23
     };
@@ -115,12 +119,15 @@ TEST(OpcodesTest, Transfer_LHLD)
     cpu.step();
     EXPECT_EQ(cpu.regs_.l, 0x8a);
     EXPECT_EQ(cpu.regs_.h, 0x23);
+    EXPECT_EQ(cpu.pc_, 3);
 }
 
 TEST(OpcodesTest, Transfer_SHLD)
 {
     uint8_t memory[] {
         atat::opcodes::shld,
+        3,
+        0,
         0,
         0
     };
@@ -130,8 +137,9 @@ TEST(OpcodesTest, Transfer_SHLD)
     cpu.regs_.l = 0x8a;
     cpu.regs_.h = 0x23;
     cpu.step();
-    EXPECT_EQ(memory[1], 0x8a);
-    EXPECT_EQ(memory[2], 0x23);
+    EXPECT_EQ(memory[3], 0x8a);
+    EXPECT_EQ(memory[4], 0x23);
+    EXPECT_EQ(cpu.pc_, 3);
 }
 
 #define LXI(A,B) \

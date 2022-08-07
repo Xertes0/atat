@@ -1,58 +1,84 @@
+#include "atat/cpu/flags.hh"
+#include "atat/opcodes.hh"
 #include <gtest/gtest.h>
 
+#include <atat/cpu/cpu.hh>
+#include <atat/cpu/registers.hh>
 #include <atat/cpu/flags.hh>
 
-TEST(FlagsTest, ParityPositive)
+TEST(FlagsTest, ParityEven)
 {
-    auto flags = atat::flags{};
+    atat::byte_t memory[] {
+        atat::opcodes::add_b,
+        atat::opcodes::add_b,
+        atat::opcodes::add_b,
+        atat::opcodes::add_b,
+    };
+    atat::cpu cpu{memory};
+    atat::reg_b::set(cpu, 0);
 
-    flags.set_zspc(0b1010);
-    EXPECT_EQ(flags.p, 1);
+    atat::reg_a::set(cpu, 0b1010);
+    cpu.step();
+    EXPECT_EQ(atat::flag_p::get(cpu), atat::PARITY_EVEN);
 
-    flags.set_zspc(0b1001000);
-    EXPECT_EQ(flags.p, 1);
+    atat::reg_a::set(cpu, 0b1001000);
+    cpu.step();
+    EXPECT_EQ(atat::flag_p::get(cpu), atat::PARITY_EVEN);
 
-    flags.set_zspc(0b1111);
-    EXPECT_EQ(flags.p, 1);
+    atat::reg_a::set(cpu, 0b1111);
+    cpu.step();
+    EXPECT_EQ(atat::flag_p::get(cpu), atat::PARITY_EVEN);
 
-    flags.set_zspc(0b11011);
-    EXPECT_EQ(flags.p, 1);
+    atat::reg_a::set(cpu, 0b11011);
+    cpu.step();
+    EXPECT_EQ(atat::flag_p::get(cpu), atat::PARITY_EVEN);
 }
 
-TEST(FlagsTest, ParityNegative)
+TEST(FlagsTest, ParityOdd)
 {
-    auto flags = atat::flags{};
+    atat::byte_t memory[] {
+        atat::opcodes::add_b,
+        atat::opcodes::add_b,
+        atat::opcodes::add_b,
+        atat::opcodes::add_b,
+    };
+    atat::cpu cpu{memory};
+    atat::reg_b::set(cpu, 0);
 
-    flags.set_zspc(0b0010);
-    EXPECT_EQ(flags.p, 0);
+    atat::reg_a::set(cpu, 0b1110);
+    cpu.step();
+    EXPECT_EQ(atat::flag_p::get(cpu), atat::PARITY_ODD);
 
-    flags.set_zspc(0b1000000);
-    EXPECT_EQ(flags.p, 0);
+    atat::reg_a::set(cpu, 0b1000000);
+    cpu.step();
+    EXPECT_EQ(atat::flag_p::get(cpu), atat::PARITY_ODD);
 
-    flags.set_zspc(0b1011);
-    EXPECT_EQ(flags.p, 0);
+    atat::reg_a::set(cpu, 0b1011);
+    cpu.step();
+    EXPECT_EQ(atat::flag_p::get(cpu), atat::PARITY_ODD);
 
-    flags.set_zspc(0b101111);
-    EXPECT_EQ(flags.p, 0);
+    atat::reg_a::set(cpu, 0b01011);
+    cpu.step();
+    EXPECT_EQ(atat::flag_p::get(cpu), atat::PARITY_ODD);
 }
 
 TEST(FlagsTest, Bits)
 {
-    auto flags = atat::flags{};
-    flags.s = 1;
-    flags.z = 0;
-    flags.p = 1;
-    flags.c = 0;
-    EXPECT_EQ(flags.bits(), 0b10000110);
+    atat::cpu cpu{nullptr};
+    atat::flag_s::set(cpu, 1);
+    atat::flag_z::set(cpu, 0);
+    atat::flag_p::set(cpu, 1);
+    atat::flag_c::set(cpu, 0);
+    EXPECT_EQ(atat::flags_bits::get(cpu), 0b10000110);
 }
 
 TEST(FlagsTest, SetBits)
 {
-    auto flags = atat::flags{};
-    flags.set_from_bits(0b10000110);
+    atat::cpu cpu{nullptr};
+    atat::flags_bits::set(cpu, 0b10000110);
 
-    EXPECT_EQ(flags.s,  1);
-    EXPECT_EQ(flags.z,  0);
-    EXPECT_EQ(flags.p,  1);
-    EXPECT_EQ(flags.c,  0);
+    EXPECT_EQ(atat::flag_s::get(cpu),  1);
+    EXPECT_EQ(atat::flag_z::get(cpu),  0);
+    EXPECT_EQ(atat::flag_p::get(cpu),  1);
+    EXPECT_EQ(atat::flag_c::get(cpu),  0);
 }

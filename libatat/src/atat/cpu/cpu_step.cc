@@ -1,627 +1,966 @@
 #include "atat/cpu/cpu.hh"
-#include "atat/opcodes.hh"
+#include "atat/cpu/registers.hh"
+#include "atat/cpu/name_to_index.hh"
+#include "atat/cpu/registers.hh"
+#include "atat/cpu/flags.hh"
+#include "atat/cpu/types.hh"
+#include "atat/exceptions.hh"
+
+#include <array>
 #include <cstdint>
-
-#define REG_ARI(NAME,REG, OP) \
-    opcodes::NAME##_##REG: \
-    { \
-        uint16_t val = static_cast<uint16_t>(regs_.a) OP static_cast<uint16_t>(regs_.REG); \
-        flags_.set_zspc(val); \
-        regs_.a = static_cast<uint8_t>(val); \
-        break; \
-    }
-
-#define REG_ARI_MEM(NAME, OP) \
-    opcodes::NAME##_m: \
-    { \
-        uint16_t val = static_cast<uint16_t>(regs_.a) OP static_cast<uint16_t>(memory_[regs_.hl()]); \
-        flags_.set_zspc(val); \
-        regs_.a = static_cast<uint8_t>(val); \
-        break; \
-    }
-
-#define REG_ARI_COMBO(NAME, OP) \
-    case REG_ARI(NAME, a, OP) \
-    case REG_ARI(NAME, b, OP) \
-    case REG_ARI(NAME, c, OP) \
-    case REG_ARI(NAME, d, OP) \
-    case REG_ARI(NAME, e, OP) \
-    case REG_ARI(NAME, h, OP) \
-    case REG_ARI(NAME, l, OP) \
-    case REG_ARI_MEM(NAME, OP)
-
-#define REG_ONE(NAME, REG, OP) \
-    opcodes::NAME##_##REG: \
-    { \
-        uint16_t val = static_cast<uint16_t>(regs_.REG) OP 1; \
-        flags_.set_zsp(val); \
-        regs_.REG = static_cast<uint8_t>(val); \
-        break; \
-    }
-
-#define REG_ONE_MEM(NAME, OP) \
-    opcodes::NAME##_m: \
-    { \
-        uint16_t val = static_cast<uint16_t>(memory_[regs_.hl()]) OP 1; \
-        flags_.set_zsp(val); \
-        memory_[regs_.hl()] OP##= 1; \
-        break; \
-    }
-
-#define REG_ONE_COMBO(NAME, OP) \
-    case REG_ONE(NAME, a, OP) \
-    case REG_ONE(NAME, b, OP) \
-    case REG_ONE(NAME, c, OP) \
-    case REG_ONE(NAME, d, OP) \
-    case REG_ONE(NAME, e, OP) \
-    case REG_ONE(NAME, h, OP) \
-    case REG_ONE(NAME, l, OP) \
-    case REG_ONE_MEM(NAME, OP)
-
-#define REG_CMP(REG) \
-    opcodes::cmp_##REG: \
-    { \
-        flags_.set_zspc(static_cast<uint16_t>(regs_.a) - static_cast<uint16_t>(regs_.REG)); \
-        break; \
-    }
-
-#define REG_CMP_MEM() \
-    opcodes::cmp_m: \
-    { \
-        flags_.set_zspc(static_cast<uint16_t>(regs_.a) - static_cast<uint16_t>(memory_[regs_.hl()])); \
-        break; \
-    }
-
-#define REG_CMP_COMBO() \
-    case REG_CMP(a) \
-    case REG_CMP(b) \
-    case REG_CMP(c) \
-    case REG_CMP(d) \
-    case REG_CMP(e) \
-    case REG_CMP(h) \
-    case REG_CMP(l) \
-    case REG_CMP_MEM()
-
-#define REG_LOG(NAME, REG, OP) \
-    opcodes::NAME##_##REG: \
-    { \
-        uint16_t val = static_cast<uint16_t>(regs_.a) OP static_cast<uint16_t>(regs_.REG); \
-        flags_.set_zspc(val); \
-        regs_.a = static_cast<uint8_t>(val); \
-        break; \
-    }
-
-#define REG_LOG_MEM(NAME, OP) \
-    opcodes::NAME##_m: \
-    { \
-        uint16_t val = static_cast<uint16_t>(regs_.a) OP static_cast<uint16_t>(memory_[regs_.hl()]); \
-        flags_.set_zspc(val); \
-        regs_.a = static_cast<uint8_t>(val); \
-        break; \
-    }
-
-#define REG_MP_DATA(NAME, OP) \
-    opcodes::NAME##_d8: \
-    { \
-        uint16_t val = static_cast<uint16_t>(regs_.a) OP static_cast<uint16_t>(*(op+1)); \
-        flags_.set_zspc(val); \
-        regs_.a = static_cast<uint8_t>(val); \
-        ++pc_; \
-        break; \
-    }
-
-#define REG_LOG_COMBO(NAME, OP) \
-    case REG_LOG(NAME, a, OP) \
-    case REG_LOG(NAME, b, OP) \
-    case REG_LOG(NAME, c, OP) \
-    case REG_LOG(NAME, d, OP) \
-    case REG_LOG(NAME, e, OP) \
-    case REG_LOG(NAME, h, OP) \
-    case REG_LOG(NAME, l, OP) \
-    case REG_LOG_MEM(NAME, OP)
-
-#define REG_ARI_CY(NAME,REG, OP) \
-    opcodes::NAME##_##REG: \
-    { \
-        uint16_t val = static_cast<uint16_t>(regs_.a) OP static_cast<uint16_t>(regs_.REG) OP static_cast<uint16_t>(flags_.c); \
-        flags_.set_zspc(val); \
-        regs_.a = static_cast<uint8_t>(val); \
-        break; \
-    }
-
-#define REG_ARI_CY_MEM(NAME, OP) \
-    opcodes::NAME##_m: \
-    { \
-        uint16_t val = static_cast<uint16_t>(regs_.a) OP static_cast<uint16_t>(memory_[regs_.hl()]) OP static_cast<uint16_t>(flags_.c); \
-        flags_.set_zspc(val); \
-        regs_.a = static_cast<uint8_t>(val); \
-        break; \
-    }
-
-#define REG_ARI_CY_DATA(NAME, OP) \
-    opcodes::NAME##_d8: \
-    { \
-        uint16_t val = static_cast<uint16_t>(regs_.a) OP static_cast<uint16_t>(*(op+1)) OP static_cast<uint16_t>(flags_.c); \
-        flags_.set_zspc(val); \
-        regs_.a = static_cast<uint8_t>(val); \
-        ++pc_; \
-        break; \
-    }
-
-#define REG_ARI_CY_COMBO(NAME, OP) \
-    case REG_ARI_CY(NAME, a, OP) \
-    case REG_ARI_CY(NAME, b, OP) \
-    case REG_ARI_CY(NAME, c, OP) \
-    case REG_ARI_CY(NAME, d, OP) \
-    case REG_ARI_CY(NAME, e, OP) \
-    case REG_ARI_CY(NAME, h, OP) \
-    case REG_ARI_CY(NAME, l, OP) \
-    case REG_ARI_CY_MEM(NAME, OP)
-
-#define REG_DAD(NAME, FUN) \
-    opcodes::dad_##NAME: \
-    { \
-        uint16_t val = regs_.hl() + regs_.FUN(); \
-        flags_.set_c(val); \
-        regs_.set_hl(val); \
-        break; \
-    }
-
-#define REG_DAD_COMBO() \
-    case REG_DAD(b, bc) \
-    case REG_DAD(d, de) \
-    case REG_DAD(h, hl) \
-    case opcodes::dad_sp: \
-    { \
-        uint16_t val = regs_.hl() + sp_; \
-        flags_.set_c(val); \
-        regs_.set_hl(val); \
-        break; \
-    }
-
-#define REG_IDC(NAME, FUN, OP) \
-    opcodes::NAME: \
-    { \
-        regs_.set_##FUN(regs_.FUN() OP 1); \
-        break; \
-    }
-
-#define REG_IDC_SP(NAME, OP) \
-    opcodes::NAME: \
-    { \
-        sp_ = sp_ OP 1; \
-        break; \
-    }
-
-#define REG_IDC_COMBO(NAME, OP) \
-    case REG_IDC(NAME##_b, bc, OP) \
-    case REG_IDC(NAME##_d, de, OP) \
-    case REG_IDC(NAME##_h, hl, OP) \
-    case REG_IDC_SP(NAME##_sp, OP)
-
-#define REG_CPI() \
-    opcodes::cpi_d8: \
-    { \
-        uint16_t val = static_cast<uint16_t>(regs_.a) - static_cast<uint16_t>(*(op+1)); \
-        flags_.set_zspc(val); \
-        ++pc_; \
-        break; \
-    }
-
-#define REG_MVI(DST) \
-    opcodes::mvi_##DST: \
-    { \
-        regs_.DST = memory_[pc_+1]; \
-        ++pc_; \
-        break; \
-    }
-
-#define REG_MVI_COMBO() \
-    case REG_MVI(b) \
-    case REG_MVI(c) \
-    case REG_MVI(d) \
-    case REG_MVI(e) \
-    case REG_MVI(h) \
-    case REG_MVI(l) \
-    case REG_MVI(a) \
-    case opcodes::mvi_m: \
-    { \
-        regs_.set_hl(memory_[pc_+1]); \
-        ++pc_; \
-        break; \
-    }
-
-#define LDAX(NAME, FUN) \
-    opcodes::ldax_##NAME: \
-    { \
-        regs_.a = memory_[regs_.FUN()]; \
-        break; \
-    }
-
-#define STAX(NAME, FUN) \
-    opcodes::stax_##NAME: \
-    { \
-        memory_[regs_.FUN()] = regs_.a; \
-        break; \
-    }
-
-#define LXI(A,B) \
-    opcodes::lxi_##A: \
-    { \
-        regs_.A = memory_[pc_+2]; \
-        regs_.B = memory_[pc_+1]; \
-        pc_ += 2; \
-        break; \
-    }
-
-#define LXI_COMBO() \
-    case LXI(b, c) \
-    case LXI(d, e) \
-    case LXI(h, l) \
-    case opcodes::lxi_sp: \
-    { \
-        sp_ = (static_cast<int16_t>(memory_[pc_+2]) << 8) | memory_[pc_+1]; \
-        pc_ += 2; \
-        break; \
-    }
-
-#define PUSH(A, B) \
-    opcodes::push_##A: \
-    { \
-        memory_[sp_-1] = regs_.A; \
-        memory_[sp_-2] = regs_.B; \
-        sp_ -= 2; \
-        break; \
-    }
-
-#define POP(A, B) \
-    opcodes::pop_##A: \
-    { \
-        regs_.A = memory_[sp_+1]; \
-        regs_.B = memory_[sp_]; \
-        sp_ += 2; \
-        break; \
-    }
-
-#define JMP() \
-    pc_ = ((static_cast<uint16_t>(memory_[pc_ + 2]) << 8) | memory_[pc_ + 1]) - 1;
-
-#define CALL() \
-    uint16_t ret = pc_ + 3; \
-    memory_[sp_-1] = static_cast<uint8_t>(ret >> 8); \
-    memory_[sp_-2] = static_cast<uint8_t>(ret & 0xff); \
-    sp_ -= 2; \
-    pc_ = ((static_cast<uint16_t>(memory_[pc_+2]) << 8) | memory_[pc_+1]) - 1;
-
-#define RET() \
-    pc_ = ((static_cast<uint16_t>(memory_[sp_+1]) << 8) | memory_[sp_]) - 1; \
-    sp_ += 2;
-
-// break if
-#define BI_NZ() \
-    if(flags_.z == 1) { pc_ += 2; break; }
-#define BI_Z() \
-    if(flags_.z == 0) { pc_ += 2; break; }
-#define BI_NC() \
-    if(flags_.c == 0) { pc_ += 2; break; }
-#define BI_C() \
-    if(flags_.c == 1) { pc_ += 2; break; }
-#define BI_PO() \
-    if(flags_.p == 0) { pc_ += 2; break; }
-#define BI_PE() \
-    if(flags_.p == 1) { pc_ += 2; break; }
-#define BI_P() \
-    if(flags_.s == 0) { pc_ += 2; break; }
-#define BI_M() \
-    if(flags_.s == 1) { pc_ += 2; break; }
-
-#define MAKE_JCR(OPCODE, BI, INS) \
-    opcodes::OPCODE: \
-    { \
-        BI(); \
-        INS(); \
-        break; \
-    }
-
-#define MAKE_JCR_COMBO(FULL, NAME, CALL) \
-    case opcodes::FULL: \
-    { \
-        CALL(); \
-        break; \
-    } \
-    case MAKE_JCR(NAME##nz, BI_Z,  CALL) \
-    case MAKE_JCR(NAME##z,  BI_NZ, CALL) \
-    case MAKE_JCR(NAME##nc, BI_C,  CALL) \
-    case MAKE_JCR(NAME##c,  BI_NC, CALL) \
-    case MAKE_JCR(NAME##po, BI_PE, CALL) \
-    case MAKE_JCR(NAME##pe, BI_PO, CALL) \
-    case MAKE_JCR(NAME##p,  BI_M,  CALL) \
-    case MAKE_JCR(NAME##m,  BI_P,  CALL)
-
-#define MOV(DST, SRC) \
-    opcodes::mov_##DST##SRC: \
-    { \
-        regs_.DST = regs_.SRC; \
-        break; \
-    }
-
-#define MOV_MEM(DST) \
-    opcodes::mov_##DST##m: \
-    { \
-        regs_.DST = static_cast<uint8_t>(regs_.hl()); \
-        break; \
-    }
-
-#define MOV_TMEM(SRC) \
-    opcodes::mov_m##SRC: \
-    { \
-        regs_.set_hl(regs_.SRC); \
-        break; \
-    }
-
-#define MOV_COMBO(DST) \
-    case MOV(DST, b) \
-    case MOV(DST, c) \
-    case MOV(DST, d) \
-    case MOV(DST, e) \
-    case MOV(DST, h) \
-    case MOV(DST, l) \
-    case MOV_MEM(DST) \
-    case MOV(DST, a)
-
-#define MOV_MCOMBO() \
-    case MOV_TMEM(b) \
-    case MOV_TMEM(c) \
-    case MOV_TMEM(d) \
-    case MOV_TMEM(e) \
-    case MOV_TMEM(h) \
-    case MOV_TMEM(l) \
-    case MOV_TMEM(a)
-
-#define MOV_COMBO_COMBO() \
-    MOV_COMBO(b) \
-    MOV_COMBO(c) \
-    MOV_COMBO(d) \
-    MOV_COMBO(e) \
-    MOV_COMBO(h) \
-    MOV_COMBO(l) \
-    MOV_MCOMBO() \
-    MOV_COMBO(a)
+#include <limits>
+#include <tuple>
+#include <functional>
+#include <type_traits>
 
 namespace atat
 {
 
+template<class A, class B, class Func, bool SetTmp = false>
+struct apply
+{
+    [[nodiscard]]
+    static
+    constexpr
+    word_t
+    get(cpu& ctx)
+    {
+        word_t value = Func{}(static_cast<word_t>(A::get(ctx)), static_cast<word_t>(B::get(ctx)));
+        if constexpr(SetTmp) {
+            ctx.step_tmp = value;
+        }
+        return value;
+    }
+
+    static
+    constexpr
+    void
+    exec(cpu& ctx)
+    {
+        word_t value = Func{}(static_cast<word_t>(A::get(ctx)), static_cast<word_t>(B::get(ctx)));
+        if constexpr(SetTmp) {
+            ctx.step_tmp = value;
+        }
+    }
+};
+
+using plus    = std::plus<word_t>;
+using minus   = std::minus<word_t>;
+using bit_and = std::bit_and<word_t>;
+using bit_or  = std::bit_or<word_t>;
+using bit_xor = std::bit_xor<word_t>;
+
+template<class Dst, class Src, bool SetTmp = false>
+struct assign
+{
+    static
+    constexpr
+    void exec(cpu& ctx)
+    {
+        auto value = Src::get(ctx);
+        if constexpr(SetTmp) {
+            ctx.step_tmp = value;
+        }
+        Dst::set(ctx, value);
+    }
+};
+
+template<class Func, class... Rest>
+struct chain
+{
+    static
+    constexpr
+    void exec(cpu& ctx)
+    {
+        Func::exec(ctx);
+        if constexpr(sizeof...(Rest) > 0) {
+            chain<Rest...>::exec(ctx);
+        }
+    }
+};
+
+struct step_tmp_value
+{
+    [[nodiscard]]
+    static
+    constexpr
+    word_t
+    get(cpu& ctx)
+    {
+        return ctx.step_tmp;
+    };
+};
+
+template<class Value, class First, class... Rest>
+struct set_flags_from_value
+{
+    template<class Flag, class... Flags>
+    static
+    constexpr
+    void set_flag(cpu& ctx)
+    {
+        auto val{Value::get(ctx)};
+        if constexpr(std::is_same_v<Flag, flag_z>) {
+            flag_z::set(ctx, (val == 0)?1:0);
+        } else if constexpr(std::is_same_v<Flag, flag_s>) {
+            flag_s::set(ctx, ((val & 0b1000000) == 1)?1:0);
+        } else if constexpr(std::is_same_v<Flag, flag_c>) {
+            flag_c::set(ctx, (val > std::numeric_limits<byte_t>::max())?1:0);
+        } else if constexpr(std::is_same_v<Flag, flag_p>) {
+            uint8_t count{0};
+            for(byte_t i{0}; i<std::numeric_limits<byte_t>::digits; ++i) {
+                count += ((val & (1 << i)) > 0)?1:0;
+            }
+            flag_p::set(ctx, (count%2 == 0)?PARITY_EVEN:PARITY_ODD);
+        }
+
+        if constexpr(sizeof...(Flags) > 0) {
+            set_flag<Flags...>(ctx);
+        }
+    }
+
+    static
+    constexpr
+    void exec(cpu& ctx)
+    {
+        set_flag<First, Rest...>(ctx);
+    }
+};
+
+template<class Location, class Type>
+struct at_memory;
+
+template<class Location>
+struct at_memory<Location, byte_t>
+{
+    [[nodiscard]]
+    static
+    constexpr
+    byte_t
+    get(cpu& ctx)
+    {
+        return ctx.memory[Location::get(ctx)];
+    }
+
+    static
+    constexpr
+    void
+    set(cpu& ctx, byte_t value)
+    {
+        #ifdef MEMORY_CHECKS
+        if(Location::get(ctx) < ROM_SIZE) {
+            throw rom_write_exception{};
+        }
+        #endif
+        ctx.memory[Location::get(ctx)] = value;
+    }
+};
+
+template<class Location>
+struct at_memory<Location, word_t>
+{
+    [[nodiscard]]
+    static
+    constexpr
+    word_t
+    get(cpu& ctx)
+    {
+        return (static_cast<word_t>(ctx.memory[Location::get(ctx) + 1]) << 8) | ctx.memory[Location::get(ctx)];
+    }
+
+    static
+    constexpr
+    void
+    set(cpu& ctx, word_t value)
+    {
+        #ifdef MEMORY_CHECKS
+        if(Location::get(ctx) + 1 < ROM_SIZE) {
+            throw rom_write_exception{};
+        }
+        #endif
+        ctx.memory[Location::get(ctx) + 1] = (value >> 8) & 0xff;
+        ctx.memory[Location::get(ctx)] = value & 0xff;
+    }
+};
+
+template<std::size_t N>
+struct step
+{
+    static
+    constexpr
+    void exec(cpu& ctx)
+    {
+        ctx.pc_ += N;
+    }
+};
+
+template<class Type, Type Value>
+struct static_value
+{
+    using value_t = Type;
+
+    [[nodiscard]]
+    static
+    constexpr
+    value_t get(cpu& ctx)
+    {
+        return Value;
+    }
+};
+
+template<class Type>
+struct following_data;
+
+template<>
+struct following_data<byte_t>
+{
+    [[nodiscard]]
+    static
+    constexpr
+    byte_t get(cpu& ctx)
+    {
+        return ctx.memory[ctx.pc_ + 1];
+    }
+};
+
+template<>
+struct following_data<word_t>
+{
+    [[nodiscard]]
+    static
+    constexpr
+    word_t get(cpu& ctx)
+    {
+        return (static_cast<word_t>(ctx.memory[ctx.pc_ + 2]) << 8) | ctx.memory[ctx.pc_ + 1];
+    }
+};
+
+struct stack_ptr
+{
+    [[nodiscard]]
+    static
+    constexpr
+    word_t get(cpu& ctx)
+    {
+        return ctx.sp_;
+    }
+
+    static
+    constexpr
+    void set(cpu& ctx, word_t value)
+    {
+        ctx.sp_ = value;
+    }
+};
+
+struct no_action
+{
+    static
+    constexpr
+    void exec(cpu& ctx) {}
+};
+
+template<class A, class B>
+struct exchange
+{
+    static
+    constexpr
+    void exec(cpu& ctx)
+    {
+        auto tmp{A::get(ctx)};
+        A::set(ctx, B::get(ctx));
+        B::set(ctx, tmp);
+    }
+};
+
+struct program_counter
+{
+    [[nodiscard]]
+    static
+    constexpr
+    word_t get(cpu& ctx)
+    {
+        return ctx.pc_;
+    }
+
+    static
+    constexpr
+    void set(cpu& ctx, word_t value)
+    {
+        ctx.pc_ = value;
+    }
+};
+
+struct reg_psw
+{
+    [[nodiscard]]
+    static
+    constexpr
+    word_t get(cpu& ctx)
+    {
+        return (static_cast<word_t>(reg_a::get(ctx)) << 8) | flags_bits::get(ctx);
+    }
+
+    static
+    constexpr
+    void set(cpu& ctx, word_t value)
+    {
+        reg_a::set(ctx, value >> 8);
+        flags_bits::set(ctx, value & 0xff);
+    }
+};
+
+struct unimplemented
+{
+    static
+    void exec(cpu& ctx)
+    {
+        throw unimplemented_instruction_exception{};
+    }
+};
+
+template<class Condition, class ActionIf, class ActionElse, bool EqualTo = true>
+struct if_true_else
+{
+    static
+    constexpr
+    void exec(cpu& ctx)
+    {
+        if(Condition::is_true(ctx) == EqualTo) {
+            ActionIf::exec(ctx);
+        } else {
+            ActionElse::exec(ctx);
+        }
+    }
+};
+
+template<class Condition>
+struct negate
+{
+    [[nodiscard]]
+    static
+    constexpr
+    bool is_true(cpu& ctx)
+    {
+        return !Condition::is_true(ctx);
+    }
+};
+
+struct flag_is_z
+{
+    [[nodiscard]]
+    static
+    constexpr
+    bool is_true(cpu& ctx)
+    {
+        return flag_z::get(ctx) == 1;
+    }
+};
+
+using flag_is_nz = negate<flag_is_z>;
+
+struct flag_has_c
+{
+    [[nodiscard]]
+    static
+    constexpr
+    bool is_true(cpu& ctx)
+    {
+        return flag_c::get(ctx) == 1;
+    }
+};
+
+using flag_has_nc = negate<flag_has_c>;
+
+struct flag_has_pe
+{
+    [[nodiscard]]
+    static
+    constexpr
+    bool is_true(cpu& ctx)
+    {
+        return flag_p::get(ctx) == PARITY_EVEN;
+    }
+};
+
+using flag_has_po = negate<flag_has_pe>;
+
+struct flag_has_s
+{
+    [[nodiscard]]
+    static
+    constexpr
+    bool is_true(cpu& ctx)
+    {
+        return flag_s::get(ctx) == 1;
+    }
+};
+
+using flag_has_ns = negate<flag_has_s>;
+
+struct rotate_acc_left_nc
+{
+    static
+    constexpr
+    void exec(cpu& ctx)
+    {
+        auto prev_c = flag_c::get(ctx);
+        flag_c::set(ctx, reg_a::get(ctx) >> 7);
+        reg_a::set(ctx, (reg_a::get(ctx) << 1) | prev_c);
+    }
+};
+
+struct rotate_acc_left_c
+{
+    static
+    constexpr
+    void exec(cpu& ctx)
+    {
+        flag_c::set(ctx, reg_a::get(ctx) >> 7);
+        reg_a::set(ctx, (reg_a::get(ctx) << 1) | flag_c::get(ctx));
+    }
+};
+
+struct rotate_acc_right_nc
+{
+    static
+    constexpr
+    void exec(cpu& ctx)
+    {
+        auto prev_c = flag_c::get(ctx);
+        flag_c::set(ctx, reg_a::get(ctx) & 1);
+        reg_a::set(ctx, (reg_a::get(ctx) >> 1) | (prev_c << 7));
+    }
+};
+
+struct rotate_acc_right_c
+{
+    static
+    constexpr
+    void exec(cpu& ctx)
+    {
+        flag_c::set(ctx, reg_a::get(ctx) & 1);
+        reg_a::set(ctx, (reg_a::get(ctx) >> 1) | (flag_c::get(ctx) << 7));
+    }
+};
+
+struct complement_carry
+{
+    static
+    constexpr
+    void exec(cpu& ctx)
+    {
+        flag_c::set(ctx, 1 - flag_c::get(ctx));
+    }
+};
+
+struct set_carry
+{
+    static
+    constexpr
+    void exec(cpu& ctx)
+    {
+        flag_c::set(ctx, 1);
+    }
+};
+
+struct complement_acc
+{
+    static
+    constexpr
+    void exec(cpu& ctx)
+    {
+        reg_a::set(ctx, ~reg_a::get(ctx));
+    }
+};
+
+struct enable_interrupt
+{
+    static
+    constexpr
+    void set(cpu& ctx, bool value)
+    {
+        ctx.int_enabled_ = value;
+    }
+};
+
+namespace instructions
+{
+
+using nop = step<1>;
+using unimpl = unimplemented;
+
+//using set_c_flag_from_tmp    = set_flags_from_value<step_tmp_value, flag_c>;
+//using set_all_flags_from_tmp = set_flags_from_value<step_tmp_value, flag_z, flag_s, flag_p, flag_c>;
+//using set_zsp_flags_from_tmp = set_flags_from_value<step_tmp_value, flag_z, flag_s, flag_p>;
+
+template<class... Flags>
+using set_flags_from_tmp = set_flags_from_value<step_tmp_value, Flags...>;
+
+// TODO
+template<class Other, class Operator, class Flags = set_flags_from_tmp<flag_z, flag_s, flag_p, flag_c>, std::size_t Step = 1, class Dst = reg_a>
+using basic_arithmetic_ass =
+    chain<
+        assign<Dst, apply<Dst, Other, Operator, true>>,
+        Flags,
+        step<Step>
+    >;
+
+template<class Other>
+using basic_add = basic_arithmetic_ass<Other, plus>;
+
+using add_b = basic_add<reg_b>;
+using add_c = basic_add<reg_c>;
+using add_d = basic_add<reg_d>;
+using add_e = basic_add<reg_e>;
+using add_h = basic_add<reg_h>;
+using add_l = basic_add<reg_l>;
+using add_m = basic_add<at_memory<reg_hl, byte_t>>;
+using add_a = basic_add<reg_a>;
+
+template<class Other>
+using basic_sub = basic_arithmetic_ass<Other, minus>;
+
+using sub_b = basic_sub<reg_b>;
+using sub_c = basic_sub<reg_c>;
+using sub_d = basic_sub<reg_d>;
+using sub_e = basic_sub<reg_e>;
+using sub_h = basic_sub<reg_h>;
+using sub_l = basic_sub<reg_l>;
+using sub_m = basic_sub<at_memory<reg_hl, byte_t>>;
+using sub_a = basic_sub<reg_a>;
+
+template<class Other>
+using basic_ana = basic_arithmetic_ass<Other, bit_and>;
+
+using ana_b = basic_ana<reg_b>;
+using ana_c = basic_ana<reg_c>;
+using ana_d = basic_ana<reg_d>;
+using ana_e = basic_ana<reg_e>;
+using ana_h = basic_ana<reg_h>;
+using ana_l = basic_ana<reg_l>;
+using ana_m = basic_ana<at_memory<reg_hl, byte_t>>;
+using ana_a = basic_ana<reg_a>;
+
+template<class Other>
+using basic_ora = basic_arithmetic_ass<Other, bit_or>;
+
+using ora_b = basic_ora<reg_b>;
+using ora_c = basic_ora<reg_c>;
+using ora_d = basic_ora<reg_d>;
+using ora_e = basic_ora<reg_e>;
+using ora_h = basic_ora<reg_h>;
+using ora_l = basic_ora<reg_l>;
+using ora_m = basic_ora<at_memory<reg_hl, byte_t>>;
+using ora_a = basic_ora<reg_a>;
+
+template<class Other>
+using basic_xra = basic_arithmetic_ass<Other, bit_xor>;
+
+using xra_b = basic_xra<reg_b>;
+using xra_c = basic_xra<reg_c>;
+using xra_d = basic_xra<reg_d>;
+using xra_e = basic_xra<reg_e>;
+using xra_h = basic_xra<reg_h>;
+using xra_l = basic_xra<reg_l>;
+using xra_m = basic_xra<at_memory<reg_hl, byte_t>>;
+using xra_a = basic_xra<reg_a>;
+
+template<class Reg, class Operator, class Flags = set_flags_from_tmp<flag_z, flag_s, flag_p>>
+using basic_by_one =
+    chain<
+        assign<Reg, apply<Reg, static_value<word_t, 1>, Operator, true>>,
+        Flags,
+        step<1>
+    >;
+
+template<class Reg>
+using basic_inr = basic_by_one<Reg, plus>;
+
+using inr_b = basic_inr<reg_b>;
+using inr_c = basic_inr<reg_c>;
+using inr_d = basic_inr<reg_d>;
+using inr_e = basic_inr<reg_e>;
+using inr_h = basic_inr<reg_h>;
+using inr_l = basic_inr<reg_l>;
+using inr_m = basic_inr<at_memory<reg_hl, byte_t>>;
+using inr_a = basic_inr<reg_a>;
+
+template<class Reg>
+using basic_dcr = basic_by_one<Reg, minus>;
+
+using dcr_b = basic_dcr<reg_b>;
+using dcr_c = basic_dcr<reg_c>;
+using dcr_d = basic_dcr<reg_d>;
+using dcr_e = basic_dcr<reg_e>;
+using dcr_h = basic_dcr<reg_h>;
+using dcr_l = basic_dcr<reg_l>;
+using dcr_m = basic_dcr<at_memory<reg_hl, byte_t>>;
+using dcr_a = basic_dcr<reg_a>;
+
+template<class Other, class Operator, std::size_t Step = 1>
+using basic_arithmetic_no_ass =
+    chain<
+        apply<reg_a, Other, Operator, true>,
+        set_flags_from_value<step_tmp_value, flag_z, flag_s, flag_p, flag_c>,
+        step<Step>
+    >;
+
+template<class Reg>
+using basic_cmp = basic_arithmetic_no_ass<Reg, minus>;
+
+using cmp_b = basic_cmp<reg_b>;
+using cmp_c = basic_cmp<reg_c>;
+using cmp_d = basic_cmp<reg_d>;
+using cmp_e = basic_cmp<reg_e>;
+using cmp_h = basic_cmp<reg_h>;
+using cmp_l = basic_cmp<reg_l>;
+using cmp_m = basic_cmp<at_memory<reg_hl, byte_t>>;
+using cmp_a = basic_cmp<reg_a>;
+
+template<class Operator>
+using basic_arithmetic_data_ass = basic_arithmetic_ass<following_data<byte_t>, Operator, set_flags_from_tmp<flag_z, flag_s, flag_p, flag_c>, 2>;
+    //chain<
+    //    assign<reg_a, apply<reg_a, following_data<byte_t>, Operator, true>>,
+    //    set_flags_from_value<step_tmp_value, flag_z, flag_s, flag_p, flag_c>,
+    //    step<2>
+    //>;
+
+using adi = basic_arithmetic_data_ass<plus>;
+using sui = basic_arithmetic_data_ass<minus>;
+using ani = basic_arithmetic_data_ass<bit_and>;
+using ori = basic_arithmetic_data_ass<bit_or>;
+using xri = basic_arithmetic_data_ass<bit_xor>;
+
+template<class Operator>
+using basic_arithmetic_data_no_ass = basic_arithmetic_no_ass<following_data<byte_t>, Operator, 2>;
+    //chain<
+    //    apply<reg_a, following_data<byte_t>, Operator, true>,
+    //    set_flags_from_value<step_tmp_value, flag_z, flag_s, flag_p, flag_c>,
+    //    step<2>
+    //>;
+
+using cpi = basic_arithmetic_data_no_ass<minus>;
+
+template<class Other, class Operator>
+using basic_arithmetic_with_carry_ass =
+    chain<
+        assign<reg_a, apply<apply<reg_a, Other, Operator>, flag_c, Operator>, true>,
+        set_flags_from_value<step_tmp_value, flag_z, flag_s, flag_p, flag_c>,
+        step<1>
+    >;
+
+template<class Other>
+using basic_adc = basic_arithmetic_with_carry_ass<Other, plus>;
+
+using adc_b = basic_adc<reg_b>;
+using adc_c = basic_adc<reg_c>;
+using adc_d = basic_adc<reg_d>;
+using adc_e = basic_adc<reg_e>;
+using adc_h = basic_adc<reg_h>;
+using adc_l = basic_adc<reg_l>;
+using adc_m = basic_adc<at_memory<reg_hl, byte_t>>;
+using adc_a = basic_adc<reg_a>;
+
+template<class Other>
+using basic_sbb = basic_arithmetic_with_carry_ass<Other, minus>;
+
+using sbb_b = basic_sbb<reg_b>;
+using sbb_c = basic_sbb<reg_c>;
+using sbb_d = basic_sbb<reg_d>;
+using sbb_e = basic_sbb<reg_e>;
+using sbb_h = basic_sbb<reg_h>;
+using sbb_l = basic_sbb<reg_l>;
+using sbb_m = basic_sbb<at_memory<reg_hl, byte_t>>;
+using sbb_a = basic_sbb<reg_a>;
+
+template<class Operator>
+using basic_arithmetic_data_with_carry_ass =
+    chain<
+        assign<reg_a, apply<apply<reg_a, following_data<byte_t>, Operator>, flag_c, Operator>, true>,
+        set_flags_from_value<step_tmp_value, flag_z, flag_s, flag_p, flag_c>,
+        step<2>
+    >;
+
+using aci = basic_arithmetic_data_with_carry_ass<plus>;
+using sbi = basic_arithmetic_data_with_carry_ass<minus>;
+
+template<class Other>
+using basic_dad = basic_arithmetic_ass<Other, plus, set_flags_from_tmp<flag_c>, 1, reg_hl>;
+
+using dad_b = basic_dad<reg_bc>;
+using dad_d = basic_dad<reg_de>;
+using dad_h = basic_dad<reg_hl>;
+using dad_s = basic_dad<stack_ptr>;
+
+template<class Reg>
+using basic_inx = basic_by_one<Reg, plus, no_action>;
+
+using inx_b = basic_inx<reg_bc>;
+using inx_d = basic_inx<reg_de>;
+using inx_h = basic_inx<reg_hl>;
+using inx_s = basic_inx<stack_ptr>;
+
+template<class Reg>
+using basic_dcx = basic_by_one<Reg, minus, no_action>;
+
+using dcx_b = basic_dcx<reg_bc>;
+using dcx_d = basic_dcx<reg_de>;
+using dcx_h = basic_dcx<reg_hl>;
+using dcx_s = basic_dcx<stack_ptr>;
+
+template<class Dst, class Src, std::size_t Step = 1>
+using basic_mov =
+    chain<
+        assign<Dst, Src>,
+        step<Step>
+    >;
+
+using mov_bb = basic_mov<reg_b, reg_b>;
+using mov_bc = basic_mov<reg_b, reg_c>;
+using mov_bd = basic_mov<reg_b, reg_d>;
+using mov_be = basic_mov<reg_b, reg_e>;
+using mov_bh = basic_mov<reg_b, reg_h>;
+using mov_bl = basic_mov<reg_b, reg_l>;
+using mov_bm = basic_mov<reg_b, at_memory<reg_hl, byte_t>>;
+using mov_ba = basic_mov<reg_b, reg_a>;
+
+using mov_cb = basic_mov<reg_c, reg_b>;
+using mov_cc = basic_mov<reg_c, reg_c>;
+using mov_cd = basic_mov<reg_c, reg_d>;
+using mov_ce = basic_mov<reg_c, reg_e>;
+using mov_ch = basic_mov<reg_c, reg_h>;
+using mov_cl = basic_mov<reg_c, reg_l>;
+using mov_cm = basic_mov<reg_c, at_memory<reg_hl, byte_t>>;
+using mov_ca = basic_mov<reg_c, reg_a>;
+
+using mov_db = basic_mov<reg_d, reg_b>;
+using mov_dc = basic_mov<reg_d, reg_c>;
+using mov_dd = basic_mov<reg_d, reg_d>;
+using mov_de = basic_mov<reg_d, reg_e>;
+using mov_dh = basic_mov<reg_d, reg_h>;
+using mov_dl = basic_mov<reg_d, reg_l>;
+using mov_dm = basic_mov<reg_d, at_memory<reg_hl, byte_t>>;
+using mov_da = basic_mov<reg_d, reg_a>;
+
+using mov_eb = basic_mov<reg_e, reg_b>;
+using mov_ec = basic_mov<reg_e, reg_c>;
+using mov_ed = basic_mov<reg_e, reg_d>;
+using mov_ee = basic_mov<reg_e, reg_e>;
+using mov_eh = basic_mov<reg_e, reg_h>;
+using mov_el = basic_mov<reg_e, reg_l>;
+using mov_em = basic_mov<reg_e, at_memory<reg_hl, byte_t>>;
+using mov_ea = basic_mov<reg_e, reg_a>;
+
+using mov_hb = basic_mov<reg_h, reg_b>;
+using mov_hc = basic_mov<reg_h, reg_c>;
+using mov_hd = basic_mov<reg_h, reg_d>;
+using mov_he = basic_mov<reg_h, reg_e>;
+using mov_hh = basic_mov<reg_h, reg_h>;
+using mov_hl = basic_mov<reg_h, reg_l>;
+using mov_hm = basic_mov<reg_h, at_memory<reg_hl, byte_t>>;
+using mov_ha = basic_mov<reg_h, reg_a>;
+
+using mov_lb = basic_mov<reg_l, reg_b>;
+using mov_lc = basic_mov<reg_l, reg_c>;
+using mov_ld = basic_mov<reg_l, reg_d>;
+using mov_le = basic_mov<reg_l, reg_e>;
+using mov_lh = basic_mov<reg_l, reg_h>;
+using mov_ll = basic_mov<reg_l, reg_l>;
+using mov_lm = basic_mov<reg_l, at_memory<reg_hl, byte_t>>;
+using mov_la = basic_mov<reg_l, reg_a>;
+
+using mov_mb = basic_mov<reg_hl, reg_b>;
+using mov_mc = basic_mov<reg_hl, reg_c>;
+using mov_md = basic_mov<reg_hl, reg_d>;
+using mov_me = basic_mov<reg_hl, reg_e>;
+using mov_mh = basic_mov<reg_hl, reg_h>;
+using mov_ml = basic_mov<reg_hl, reg_l>;
+using mov_mm = basic_mov<reg_hl, at_memory<reg_hl, byte_t>>;
+using mov_ma = basic_mov<reg_hl, reg_a>;
+
+using mov_ab = basic_mov<reg_a, reg_b>;
+using mov_ac = basic_mov<reg_a, reg_c>;
+using mov_ad = basic_mov<reg_a, reg_d>;
+using mov_ae = basic_mov<reg_a, reg_e>;
+using mov_ah = basic_mov<reg_a, reg_h>;
+using mov_al = basic_mov<reg_a, reg_l>;
+using mov_am = basic_mov<reg_a, at_memory<reg_hl, byte_t>>;
+using mov_aa = basic_mov<reg_a, reg_a>;
+
+template<class Dst>
+using basic_mvi = basic_mov<Dst, following_data<byte_t>, 2>;
+
+using mvi_b = basic_mvi<reg_b>;
+using mvi_c = basic_mvi<reg_c>;
+using mvi_d = basic_mvi<reg_d>;
+using mvi_e = basic_mvi<reg_e>;
+using mvi_h = basic_mvi<reg_h>;
+using mvi_l = basic_mvi<reg_l>;
+using mvi_m = basic_mvi<reg_hl>;
+using mvi_a = basic_mvi<reg_a>;
+
+using lda = basic_mov<reg_a, at_memory<following_data<word_t>, byte_t>, 3>;
+
+template<class Src>
+using basic_ldax = basic_mov<reg_a, at_memory<Src, byte_t>>;
+
+using ldax_b = basic_ldax<reg_bc>;
+using ldax_d = basic_ldax<reg_de>;
+
+using sta = basic_mov<at_memory<following_data<word_t>, byte_t>, reg_a , 3>;
+
+template<class Dst>
+using basic_stax = basic_mov<at_memory<Dst, byte_t>, reg_a>;
+
+using stax_b = basic_stax<reg_bc>;
+using stax_d = basic_stax<reg_de>;
+
+using lhld = basic_mov<reg_hl, at_memory<following_data<word_t>, word_t>, 3>;
+using shld = basic_mov<at_memory<following_data<word_t>, word_t>, reg_hl, 3>;
+
+template<class Reg>
+using basic_lxi = basic_mov<Reg, following_data<word_t>, 3>;
+
+using lxi_b = basic_lxi<reg_bc>;
+using lxi_d = basic_lxi<reg_de>;
+using lxi_h = basic_lxi<reg_hl>;
+using lxi_s = basic_lxi<stack_ptr>;
+
+template<class A, class B, std::size_t Step = 1>
+using basic_exchange =
+    chain<
+        exchange<A, B>,
+        step<Step>
+    >;
+
+using xthl = basic_exchange<reg_hl, at_memory<stack_ptr, word_t>>;
+using sphl = basic_mov<stack_ptr, reg_hl>;
+using pchl = basic_mov<program_counter, reg_hl, 0>;
+using xchg = basic_exchange<reg_hl, reg_de>;
+
+template<class Src>
+using basic_push =
+    chain<
+        assign<at_memory<apply<stack_ptr, static_value<word_t, 2>, minus>, word_t>, Src>,
+        assign<stack_ptr, apply<stack_ptr, static_value<word_t, 2>, minus>>,
+        step<1>
+    >;
+
+using push_b = basic_push<reg_bc>;
+using push_d = basic_push<reg_de>;
+using push_h = basic_push<reg_hl>;
+using push_psw = basic_push<reg_psw>;
+
+template<class Dst>
+using basic_pop =
+    chain<
+        assign<Dst, at_memory<stack_ptr, word_t>>,
+        assign<stack_ptr, apply<stack_ptr, static_value<word_t, 2>, plus>>,
+        step<1>
+    >;
+
+using pop_b = basic_pop<reg_bc>;
+using pop_d = basic_pop<reg_de>;
+using pop_h = basic_pop<reg_hl>;
+using pop_psw = basic_pop<reg_psw>;
+
+using jmp = assign<program_counter, following_data<word_t>>;
+
+using call =
+    chain<
+        assign<at_memory<apply<stack_ptr, static_value<word_t, 2>, minus>, word_t>, apply<program_counter, static_value<word_t, 3>, plus>>,
+        assign<stack_ptr, apply<stack_ptr, static_value<word_t, 2>, minus>>,
+        assign<program_counter, following_data<word_t>>
+    >;
+
+using ret =
+    chain<
+        assign<program_counter, at_memory<stack_ptr, word_t>>,
+        assign<stack_ptr, apply<stack_ptr, static_value<word_t, 2>, plus>>
+    >;
+
+template<class Condition, class Action>
+using basic_jcr = if_true_else<Condition, Action, step<3>>;
+
+template<class Condition>
+using basic_jmp_con = basic_jcr<Condition, jmp>;
+
+using jnz = basic_jmp_con<flag_is_nz>;
+using jz  = basic_jmp_con<flag_is_z>;
+using jnc = basic_jmp_con<flag_has_nc>;
+using jc  = basic_jmp_con<flag_has_c>;
+using jpo = basic_jmp_con<flag_has_po>;
+using jpe = basic_jmp_con<flag_has_pe>;
+using jp  = basic_jmp_con<flag_has_ns>;
+using jm  = basic_jmp_con<flag_has_s>;
+
+template<class Condition>
+using basic_call_con = basic_jcr<Condition, call>;
+
+using cnz = basic_call_con<flag_is_nz>;
+using cz  = basic_call_con<flag_is_z>;
+using cnc = basic_call_con<flag_has_nc>;
+using cc  = basic_call_con<flag_has_c>;
+using cpo = basic_call_con<flag_has_po>;
+using cpe = basic_call_con<flag_has_pe>;
+using cp  = basic_call_con<flag_has_ns>;
+using cm  = basic_call_con<flag_has_s>;
+
+template<class Condition>
+using basic_ret_con = basic_jcr<Condition, ret>;
+
+using rnz = basic_ret_con<flag_is_nz>;
+using rz  = basic_ret_con<flag_is_z>;
+using rnc = basic_ret_con<flag_has_nc>;
+using rc  = basic_ret_con<flag_has_c>;
+using rpo = basic_ret_con<flag_has_po>;
+using rpe = basic_ret_con<flag_has_pe>;
+using rp  = basic_ret_con<flag_has_ns>;
+using rm  = basic_ret_con<flag_has_s>;
+
+template<class Action, std::size_t Step = 1>
+using action_then_step =
+    chain<
+        Action,
+        step<Step>
+    >;
+
+using ral = action_then_step<rotate_acc_left_nc>;
+using rlc = action_then_step<rotate_acc_left_c>;
+using rar = action_then_step<rotate_acc_right_nc>;
+using rrc = action_then_step<rotate_acc_right_c>;
+
+using cmc = action_then_step<complement_carry>;
+using cma = action_then_step<complement_acc>;
+using stc = action_then_step<set_carry>;
+
+// Skip OUT and IN
+using out = step<2>;
+using in  = step<2>;
+
+using ei = action_then_step<assign<enable_interrupt, static_value<bool, true>>>;
+using di = action_then_step<assign<enable_interrupt, static_value<bool, false>>>;
+
+#define I(T) T::exec
+
+std::array<std::function<void(cpu&)>, 0x100> table
+
+{
+#include "atat/opcodes.txt"
+
+};
+
+#undef I
+
+} // namespace instructions
+
 void
 cpu::step()
 {
-    uint8_t const* op = memory_ + pc_;
+    uint8_t op = memory[pc_];
 
-    switch(*op)
-    {
-        default:
-        {
-            throw unimplemented_instruction_exception{*op};
-            break;
-        }
-
-        case opcodes::out: break;
-        case opcodes::in:  break;
-
-        case opcodes::nop: break;
-        case opcodes::nop1: break;
-        case opcodes::nop2: break;
-        case opcodes::nop3: break;
-        case opcodes::nop4: break;
-        case opcodes::nop5: break;
-        case opcodes::nop6: break;
-        case opcodes::nop7: break;
-        case opcodes::nop8: break;
-        case opcodes::nop9: break;
-        case opcodes::nop10: break;
-        case opcodes::nop11: break;
-        case opcodes::nop12: break;
-
-        REG_ARI_COMBO(add, +)
-        REG_ARI_COMBO(sub, -)
-
-        REG_ONE_COMBO(inr, +)
-        REG_ONE_COMBO(dcr, -)
-
-        REG_CMP_COMBO()
-
-        REG_LOG_COMBO(ana, &)
-        REG_LOG_COMBO(ora, |)
-        REG_LOG_COMBO(xra, ^)
-
-        case REG_CPI()
-
-        case REG_MP_DATA(adi, +)
-        case REG_MP_DATA(sui, -)
-        case REG_MP_DATA(ani, &)
-        case REG_MP_DATA(ori, |)
-        case REG_MP_DATA(xri, ^)
-
-        REG_ARI_CY_COMBO(adc, +)
-        REG_ARI_CY_COMBO(sbb, -)
-
-        case REG_ARI_CY_DATA(aci, +)
-        case REG_ARI_CY_DATA(sbi, -)
-
-        REG_DAD_COMBO()
-
-        REG_IDC_COMBO(inx, +)
-        REG_IDC_COMBO(dcx, -)
-
-        MAKE_JCR_COMBO(jmp,  j, JMP)
-        MAKE_JCR_COMBO(call, c, CALL)
-        MAKE_JCR_COMBO(ret,  r, RET)
-
-        MOV_COMBO_COMBO()
-
-        REG_MVI_COMBO()
-
-        LXI_COMBO()
-
-        case LDAX(b, bc)
-        case LDAX(d, de)
-
-        case STAX(b, bc)
-        case STAX(d, de)
-
-        case PUSH(b, c);
-        case PUSH(d, e);
-        case PUSH(h, l);
-
-        case opcodes::push_psw:
-        {
-            memory_[sp_-2] = flags_.bits();
-            memory_[sp_-1] = regs_.a;
-            sp_ -= 2;
-            break;
-        }
-
-        case POP(b, c);
-        case POP(d, e);
-        case POP(h, l);
-
-        case opcodes::pop_psw:
-        {
-            flags_.set_from_bits(memory_[sp_]);
-            regs_.a = memory_[sp_+1];
-            sp_ += 2;
-            break;
-        }
-
-        case opcodes::pchl:
-        {
-            pc_ = regs_.hl() - 1;
-            break;
-        }
-
-        case opcodes::xchg:
-        {
-            auto hl = regs_.hl();
-            regs_.set_hl(regs_.de());
-            regs_.set_de(hl);
-            break;
-        }
-
-        case opcodes::lda:
-        {
-            regs_.a = memory_[(static_cast<uint16_t>(memory_[pc_+2]) << 8) | memory_[pc_+1]];
-            pc_ += 2;
-            break;
-        }
-
-        case opcodes::sta:
-        {
-            memory_[(static_cast<uint16_t>(memory_[pc_+2]) << 8) | memory_[pc_+1]] = regs_.a;
-            pc_ += 2;
-            break;
-        }
-
-        case opcodes::lhld:
-        {
-            regs_.l = memory_[pc_ + 1];
-            regs_.h = memory_[pc_ + 2];
-            pc_ += 2;
-            break;
-        }
-
-        case opcodes::shld:
-        {
-            memory_[pc_ + 1] = regs_.l;
-            memory_[pc_ + 2] = regs_.h;
-            pc_ += 2;
-            break;
-        }
-
-        case opcodes::sphl:
-        {
-            sp_ = regs_.hl();
-            break;
-        }
-
-        case opcodes::xthl:
-        {
-            auto hl   = regs_.hl();
-            auto low  = memory_[sp_];
-            auto high = memory_[sp_+1];
-
-            memory_[sp_]   = hl & 0xff;
-            memory_[sp_+1] = (hl >> 8) & 0xff;
-            regs_.h = high;
-            regs_.l = low;
-
-            break;
-        }
-
-        case opcodes::cmc:
-        {
-            flags_.c = !flags_.c;
-            return;
-        }
-
-        case opcodes::stc:
-        {
-            flags_.c = 1;
-            return;
-        }
-
-        //case opcodes::cma:
-        //{
-        //    flags_.a = !flags_.a;
-        //    return;
-        //}
-
-        case opcodes::ral:
-        {
-            auto prev_c = flags_.c;
-            flags_.c = regs_.a >> 7;
-            regs_.a <<= 1;
-            regs_.a |= prev_c & 1;
-            break;
-        }
-
-        case opcodes::rar:
-        {
-            auto prev_c = flags_.c;
-            flags_.c = regs_.a & 1;
-            regs_.a >>= 1;
-            regs_.a |= (static_cast<uint8_t>(prev_c) << 7);
-            break;
-        }
-
-        case opcodes::rlc:
-        {
-            flags_.c = (regs_.a >> 7) & 1;
-            regs_.a <<= 1;
-            regs_.a |= flags_.c;
-            break;
-        }
-
-        case opcodes::rrc:
-        {
-            flags_.c = regs_.a & 1;
-            regs_.a >>= 1;
-            regs_.a |= static_cast<uint8_t>(flags_.c) << 7;
-            break;
-        }
-
-        case opcodes::di:
-        {
-            int_enable_ = false;
-            break;
-        }
-
-        case opcodes::ei:
-        {
-            int_enable_ = true;
-            break;
-        }
-
-    }
-    ++pc_;
+    instructions::table[op](*this);
 }
 
 } // namespace atat

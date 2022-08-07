@@ -6,90 +6,132 @@
  * Cpu flags.
  */
 
-#include <cstdint>
+#include "atat/cpu/cpu.hh"
+#include "atat/cpu/name_to_index.hh"
+#include "atat/cpu/types.hh"
 
 namespace atat
 {
 
-/**
- * Contains cpu flags.
- */
-struct flags
+static constexpr byte_t PARITY_EVEN{1};
+static constexpr byte_t PARITY_ODD {0};
+
+enum class flag_name
 {
-	/**
-	 * Zero bit.
-	 * Set to 1 if result is zero.
-	 */
-	uint8_t z:1;
+    Z, S, P, C,
+};
 
-	/**
-	 * Sign bit.
-	 * Set to 1 if bit 7 is set.
-	 */
-	uint8_t s:1;
+template<>
+struct name_to_index<flag_name, flag_name::Z>
+{ static constexpr std::size_t value{0}; };
 
-	/**
-	 * Parity bit.
-	 * Set to 1 if result has even parity.
-	 */
-	uint8_t p:1;
+template<>
+struct name_to_index<flag_name, flag_name::S>
+{ static constexpr std::size_t value{1}; };
 
-	/**
-	 * Carry bit.
-	 * Set to 1 if instruction resulted in carry out or borrow into higer bit.
-	 */
-	uint8_t c:1;
+template<>
+struct name_to_index<flag_name, flag_name::P>
+{ static constexpr std::size_t value{2}; };
 
-	//uint8_t a:1; // auxillary carry
-	//uint8_t pad:3;
+template<>
+struct name_to_index<flag_name, flag_name::C>
+{ static constexpr std::size_t value{3}; };
 
-	/**
-	 * Constructor.
-	 * Zero initializes the data members.
-	 */
-	flags();
+template<flag_name Name>
+using flag_name_to_index = name_to_index<flag_name, Name>;
 
-	/**
-	 * Returns flags as bits.
-	 * Format: SZ0A0P1C
-	 *
-	 * @return uint8_t
-	 */
-	uint8_t
-	bits();
+template<class Derived>
+struct flag_by_reference
+{
+    static
+    constexpr
+    void
+    set(cpu& ctx, uint8_t val)
+    {
+        Derived::get_ref(ctx) = val;
+    }
 
-	/**
-	 * Sets flags from bits.
-	 * Format: SZ0A0P1C
-	 *
-	 * @param bits
-	 */
-	void
-	set_from_bits(uint8_t bits);
+    [[nodiscard]]
+    static
+    constexpr
+    uint8_t
+    get(cpu& ctx)
+    {
+        return Derived::get_ref(ctx).value;
+    }
+};
 
-	/**
-	 * Sets z,s,p,c flags based on the value.
-	 *
-	 * @param val Instruction result
-	 */
-	void
-	set_zspc(uint16_t val);
+template<std::size_t N>
+struct flag_by_index : public flag_by_reference<flag_by_index<N>>
+{
+    [[nodiscard]]
+    static
+    constexpr
+    flag&
+    get_ref(cpu& ctx)
+    {
+        return ctx.flags[N];
+    }
+};
 
-	/**
-	 * Sets z,s,p flags based on the value.
-	 *
-	 * @param val Instruction result
-	 */
-	void
-	set_zsp(uint16_t val);
+template<flag_name Name>
+using flag_by_name = flag_by_index<flag_name_to_index<Name>::value>;
 
-	/**
-	 * Sets c flag based on the value.
-	 *
-	 * @param val Instruction result
-	 */
-	void
-	set_c(uint16_t val);
+/**
+ * Zero flag.
+ * Set to 1 if result is zero.
+ */
+using flag_z = flag_by_name<flag_name::Z>;
+
+/**
+ * Sign flag.
+ * Set to 1 if the sign bit is set.
+ */
+using flag_s = flag_by_name<flag_name::S>;
+
+/**
+ * Parity flag.
+ * See PARITY_EVEN and PARITY_ODD constants.
+ */
+using flag_p = flag_by_name<flag_name::P>;
+
+/**
+ * Carry flag.
+ * Set to 1 when overflow.
+ */
+using flag_c = flag_by_name<flag_name::C>;
+
+/**
+ * Simulate flag register.
+ * Flag register bits: SZ0A0P1C.
+ */
+struct flags_bits
+{
+    [[nodiscard]]
+    static
+    constexpr
+    byte_t get(cpu& ctx)
+    {
+        return
+            flag_s::get(ctx) << 7 |
+            flag_z::get(ctx) << 6 |
+            0 << 5 |
+            0 << 4 | // auxillary flag is not implemented
+            0 << 3 |
+            flag_p::get(ctx) << 2 |
+            1 << 1 |
+            flag_c::get(ctx);
+    }
+
+    static
+    constexpr
+    void set(cpu& ctx, byte_t value)
+    {
+        flag_s::set(ctx, (value >> 7) & 1);
+        flag_z::set(ctx, (value >> 6) & 1);
+        flag_p::set(ctx, (value >> 2) & 1);
+        flag_c::set(ctx, value & 1);
+    }
 };
 
 } // namespace atat

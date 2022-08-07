@@ -33,11 +33,11 @@ TEST(OpcodesTest, JCR_JNZ)
 
     auto cpu = atat::cpu{memory};
 
-    cpu.flags_.z = 0;
-    cpu.step();
-    EXPECT_NE(cpu.pc_, 0xabcd);
-
     cpu.flags_.z = 1;
+    cpu.step();
+    EXPECT_EQ(cpu.pc_, 3);
+
+    cpu.flags_.z = 0;
     cpu.step();
     EXPECT_EQ(cpu.pc_, 0xabcd);
 }
@@ -55,11 +55,11 @@ TEST(OpcodesTest, JCR_JZ)
 
     auto cpu = atat::cpu{memory};
 
-    cpu.flags_.z = 1;
-    cpu.step();
-    EXPECT_NE(cpu.pc_, 0xabcd);
-
     cpu.flags_.z = 0;
+    cpu.step();
+    EXPECT_EQ(cpu.pc_, 3);
+
+    cpu.flags_.z = 1;
     cpu.step();
     EXPECT_EQ(cpu.pc_, 0xabcd);
 }
