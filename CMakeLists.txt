@@ -4,12 +4,27 @@ project(atat_em CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED 20)
 
-option(UNIT_TESTS "Build unit tests" OFF)
+option(DISABLE_TESTS "Force disable every test" ON)
+option(UNIT_TESTS "Build unit tests" ON)
+option(CPUDIAG_TEST "Build cpudiag test" ON)
+
 option(DOXYGEN "Build doxygen documentation" OFF)
 
 option(MEMORY_CHECKS "Enable memory check. Automatically disabled when UNIT_TESTS are enabled" ON)
+
+if(DISABLE_TESTS)
+    set(UNIT_TESTS OFF)
+    set(CPUDIAG OFF)
+endif()
+
 if(UNIT_TESTS)
     set(MEMORY_CHECKS OFF)
+endif()
+
+if(CPUDIAG_TEST)
+    if(NOT CPUDIAG_PATH)
+        message(FATAL_ERROR "Set CPUDIAG_PATH or disable CPUDIAG_TEST option")
+    endif()
 endif()
 
 if(MEMORY_CHECKS)

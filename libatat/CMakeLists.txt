@@ -8,9 +8,7 @@ target_include_directories(atat PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 target_link_libraries(atat)
 
-if(UNIT_TESTS)
-    add_subdirectory(tests)
-endif()
+add_subdirectory(tests)
 
 if(DOXYGEN)
     set(DOXYGEN_JAVADOC_AUTOBRIEF YES)

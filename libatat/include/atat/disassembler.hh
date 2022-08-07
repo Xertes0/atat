@@ -2,13 +2,15 @@
 
 /**
  * @file disassembler.hh
- * 
+ *
  * ROM disassembler.
  */
 
 #include <cstdint>
 #include <vector>
 #include <string_view>
+
+#include "atat/cpu/types.hh"
 
 namespace atat
 {
@@ -20,7 +22,7 @@ namespace atat
  * @param path Path to ROM file.
  * @return std::vector<uint8_t>
  */
-std::vector<uint8_t>
-memory_with_rom(std::string_view path);
+std::vector<byte_t>
+memory_with_rom(std::string_view path, word_t offset = 0);
 
 } // namespace atat

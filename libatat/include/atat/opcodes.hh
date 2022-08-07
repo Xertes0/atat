@@ -135,7 +135,7 @@ static constexpr inline uint8_t mov_md{0x72};
 static constexpr inline uint8_t mov_me{0x73};
 static constexpr inline uint8_t mov_mh{0x74};
 static constexpr inline uint8_t mov_ml{0x75};
-//static constexpr inline uint8_t hlt   {0x76};
+static constexpr inline uint8_t hlt   {0x76};
 static constexpr inline uint8_t mov_ma{0x77};
 static constexpr inline uint8_t mov_ab{0x78};
 static constexpr inline uint8_t mov_ac{0x79};

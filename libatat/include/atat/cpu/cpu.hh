@@ -161,6 +161,22 @@ public:
 	void
 	step();
 
+    /**
+     * Return the next instruction to be executed or next count bytes.
+     * Does not advance the program counter.
+     *
+     * @param count Amount of bytes after next instruction
+     * @return byte_t Next instruction
+     */
+    byte_t
+    peek(word_t count = 0);
+
+    /**
+     * Advances the program counter by the given value.
+     */
+    void
+    skip_bytes(word_t count);
+
     old::regs regs_;   ///< Old registers interface for unit tests.
     old::flags flags_; ///< Old falgs interface for unit tests.
 };
