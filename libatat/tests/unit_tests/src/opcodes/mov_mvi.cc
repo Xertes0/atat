@@ -46,15 +46,55 @@
     { \
         uint8_t memory[] = { \
             atat::opcodes::mov_m##SRC, \
-            atat::opcodes::mov_m##SRC \
+            atat::opcodes::mov_m##SRC, \
+            0, \
+            0, \
         }; \
         auto cpu = atat::cpu{memory}; \
         cpu.regs_.SRC = 83; \
+        cpu.regs_.set_hl(2); \
         cpu.step(); \
-        EXPECT_EQ(cpu.regs_.hl(), 83); \
+        EXPECT_EQ(memory[2], 83); \
         cpu.regs_.SRC = 12; \
+        cpu.regs_.set_hl(3); \
         cpu.step(); \
-        EXPECT_EQ(cpu.regs_.hl(), 12); \
+        EXPECT_EQ(memory[3], 12); \
+    }
+
+#define MOV_MH() \
+    TEST(OpcodesTest, MOV_mh) \
+    { \
+        uint8_t memory[] = { \
+            atat::opcodes::mov_mh, \
+            atat::opcodes::mov_mh, \
+            0, \
+            0, \
+        }; \
+        auto cpu = atat::cpu{memory}; \
+        cpu.regs_.set_hl(2); \
+        cpu.step(); \
+        EXPECT_EQ(memory[2], 0); \
+        cpu.regs_.set_hl(3); \
+        cpu.step(); \
+        EXPECT_EQ(memory[3], 0); \
+    }
+
+#define MOV_ML() \
+    TEST(OpcodesTest, MOV_ml) \
+    { \
+        uint8_t memory[] = { \
+            atat::opcodes::mov_ml, \
+            atat::opcodes::mov_ml, \
+            0, \
+            0, \
+        }; \
+        auto cpu = atat::cpu{memory}; \
+        cpu.regs_.set_hl(2); \
+        cpu.step(); \
+        EXPECT_EQ(memory[2], 2); \
+        cpu.regs_.set_hl(3); \
+        cpu.step(); \
+        EXPECT_EQ(memory[3], 3); \
     }
 
 #define MOV_COMBO(DST) \
@@ -72,8 +112,8 @@
     MOV_TMEM(c) \
     MOV_TMEM(d) \
     MOV_TMEM(e) \
-    MOV_TMEM(h) \
-    MOV_TMEM(l) \
+    MOV_MH() \
+    MOV_ML() \
     MOV_TMEM(a)
 
 #define MOV_COMBO_COMBO() \
@@ -111,17 +151,19 @@ MOV_COMBO_COMBO()
     { \
         uint8_t memory[] { \
             atat::opcodes::mvi_m, \
-            0, \
+            0x23, \
             atat::opcodes::mvi_m, \
-            0 \
+            0xf2, \
+            0, \
+            0, \
         }; \
         auto cpu = atat::cpu{memory}; \
-        memory[1] = 0x23; \
+        cpu.regs_.set_hl(4); \
         cpu.step(); \
-        EXPECT_EQ(cpu.regs_.hl(), 0x23); \
-        memory[3] = 0xf2; \
+        EXPECT_EQ(memory[4], 0x23); \
+        cpu.regs_.set_hl(5); \
         cpu.step(); \
-        EXPECT_EQ(cpu.regs_.hl(), 0xf2); \
+        EXPECT_EQ(memory[5], 0xf2); \
     }
 
 #define MVI_COMBO() \
