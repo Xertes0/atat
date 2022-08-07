@@ -99,19 +99,32 @@ struct set_flags_from_value
     constexpr
     void set_flag(cpu& ctx)
     {
-        auto val{Value::get(ctx)};
+        word_t val{Value::get(ctx)};
         if constexpr(std::is_same_v<Flag, flag_z>) {
-            flag_z::set(ctx, (val == 0)?1:0);
+            flag_z::set(ctx, ((val & 0xff) == 0)?1:0);
         } else if constexpr(std::is_same_v<Flag, flag_s>) {
-            flag_s::set(ctx, ((val & 0b1000000) == 1)?1:0);
+            flag_s::set(ctx, ((val & 0b10000000) != 0)?1:0);
         } else if constexpr(std::is_same_v<Flag, flag_c>) {
             flag_c::set(ctx, (val > std::numeric_limits<byte_t>::max())?1:0);
         } else if constexpr(std::is_same_v<Flag, flag_p>) {
-            uint8_t count{0};
-            for(byte_t i{0}; i<std::numeric_limits<byte_t>::digits; ++i) {
-                count += ((val & (1 << i)) > 0)?1:0;
+            //val &= 0b01111111; // Ignore sign bit
+            //byte_t count{0};
+            //for(byte_t i{0}; i<std::numeric_limits<byte_t>::digits; ++i) {
+            //    count += ((val & (1 << i)) > 0)?1:0;
+            //}
+            //flag_p::set(ctx, (count%2 == 0)?PARITY_EVEN:PARITY_ODD);
+
+            val &= 0xff;
+            byte_t count{0};
+            while(val > 0) {
+                if(val & 0x1) {
+                    ++count;
+                }
+                val >>= 1;
             }
-            flag_p::set(ctx, (count%2 == 0)?PARITY_EVEN:PARITY_ODD);
+            flag_p::set(ctx, (count&0x1)?0:1);
+        } else {
+            int a = *((volatile int*)0);
         }
 
         if constexpr(sizeof...(Flags) > 0) {
@@ -770,14 +783,14 @@ using mov_ll = basic_mov<reg_l, reg_l>;
 using mov_lm = basic_mov<reg_l, at_memory<reg_hl, byte_t>>;
 using mov_la = basic_mov<reg_l, reg_a>;
 
-using mov_mb = basic_mov<reg_hl, reg_b>;
-using mov_mc = basic_mov<reg_hl, reg_c>;
-using mov_md = basic_mov<reg_hl, reg_d>;
-using mov_me = basic_mov<reg_hl, reg_e>;
-using mov_mh = basic_mov<reg_hl, reg_h>;
-using mov_ml = basic_mov<reg_hl, reg_l>;
-using mov_mm = basic_mov<reg_hl, at_memory<reg_hl, byte_t>>;
-using mov_ma = basic_mov<reg_hl, reg_a>;
+using mov_mb = basic_mov<at_memory<reg_hl, byte_t>, reg_b>;
+using mov_mc = basic_mov<at_memory<reg_hl, byte_t>, reg_c>;
+using mov_md = basic_mov<at_memory<reg_hl, byte_t>, reg_d>;
+using mov_me = basic_mov<at_memory<reg_hl, byte_t>, reg_e>;
+using mov_mh = basic_mov<at_memory<reg_hl, byte_t>, reg_h>;
+using mov_ml = basic_mov<at_memory<reg_hl, byte_t>, reg_l>;
+using mov_mm = basic_mov<at_memory<reg_hl, byte_t>, at_memory<reg_hl, byte_t>>;
+using mov_ma = basic_mov<at_memory<reg_hl, byte_t>, reg_a>;
 
 using mov_ab = basic_mov<reg_a, reg_b>;
 using mov_ac = basic_mov<reg_a, reg_c>;
@@ -797,7 +810,7 @@ using mvi_d = basic_mvi<reg_d>;
 using mvi_e = basic_mvi<reg_e>;
 using mvi_h = basic_mvi<reg_h>;
 using mvi_l = basic_mvi<reg_l>;
-using mvi_m = basic_mvi<reg_hl>;
+using mvi_m = basic_mvi<at_memory<reg_hl, byte_t>>;
 using mvi_a = basic_mvi<reg_a>;
 
 using lda = basic_mov<reg_a, at_memory<following_data<word_t>, byte_t>, 3>;
@@ -880,8 +893,8 @@ using ret =
         assign<stack_ptr, apply<stack_ptr, static_value<word_t, 2>, plus>>
     >;
 
-template<class Condition, class Action>
-using basic_jcr = if_true_else<Condition, Action, step<3>>;
+template<class Condition, class Action, std::size_t Step = 3>
+using basic_jcr = if_true_else<Condition, Action, step<Step>>;
 
 template<class Condition>
 using basic_jmp_con = basic_jcr<Condition, jmp>;
@@ -908,7 +921,7 @@ using cp  = basic_call_con<flag_has_ns>;
 using cm  = basic_call_con<flag_has_s>;
 
 template<class Condition>
-using basic_ret_con = basic_jcr<Condition, ret>;
+using basic_ret_con = basic_jcr<Condition, ret, 1>;
 
 using rnz = basic_ret_con<flag_is_nz>;
 using rz  = basic_ret_con<flag_is_z>;

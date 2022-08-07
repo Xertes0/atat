@@ -22,8 +22,12 @@ int main()
     memory[0x59d] = 0xc2;
     memory[0x59e] = 0x05;
 
+    // For debugging
+    std::vector<atat::word_t> history{};
+
     atat::cpu cpu{memory.data()};
     while(true) {
+        history.push_back(cpu.pc_);
         auto next{cpu.peek()};
         if(next == atat::opcodes::hlt) {
             break;
@@ -42,7 +46,7 @@ int main()
                     std::printf("Should not be called\n");
                     break;
                 }
-                cpu.skip_bytes(3);
+                return 0;
             } else if(call_adr == 0) {
                 break;
                 cpu.skip_bytes(3);
