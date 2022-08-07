@@ -41,4 +41,3 @@ if(DOXYGEN)
 endif()
 
 add_subdirectory(libatat)
-add_subdirectory(atat)
