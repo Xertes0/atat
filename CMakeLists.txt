@@ -21,12 +21,6 @@ if(UNIT_TESTS)
     set(MEMORY_CHECKS OFF)
 endif()
 
-if(CPUDIAG_TEST)
-    if(NOT CPUDIAG_PATH)
-        message(FATAL_ERROR "Set CPUDIAG_PATH or disable CPUDIAG_TEST option")
-    endif()
-endif()
-
 if(MEMORY_CHECKS)
     add_compile_definitions(MEMORY_CHECKS)
 endif()

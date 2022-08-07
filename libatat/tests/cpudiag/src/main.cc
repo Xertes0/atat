@@ -5,9 +5,13 @@
 #include <cstddef>
 #include <cstdio>
 
-int main()
+int main(int argc, char const** argv)
 {
-    auto memory{atat::memory_with_rom(std::string_view{CPUDIAG_PATH}, 0x100)};
+    if(argc < 2) {
+        std::fprintf(::stderr, "Specify cpudiag binary file path\n");
+        return 1;
+    }
+    auto memory{atat::memory_with_rom(std::string_view{argv[1]}, 0x100)};
 
     // First instruction jmp 0x100
     memory[0] = atat::opcodes::jmp;
