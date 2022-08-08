@@ -4,7 +4,11 @@
 namespace atat
 {
 
-cpu::cpu(uint8_t* memory) :
+cpu::cpu(
+    byte_t* memory,
+    std::optional<in_callback_t>  in_callback,
+    std::optional<out_callback_t> out_callback
+) :
     registers{},
     sp_{},
     pc_{},
@@ -12,7 +16,9 @@ cpu::cpu(uint8_t* memory) :
     flags{},
     regs_{this},
     flags_{this},
-    int_enabled_{0} {}
+    int_enabled_{0},
+    in_cb{in_callback},
+    out_cb{out_callback} {}
 
 byte_t
 cpu::peek(word_t count)

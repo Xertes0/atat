@@ -8,6 +8,8 @@
 
 #include <array>
 #include <cstdint>
+#include <functional>
+#include <optional>
 #include <vector>
 
 #include "atat/cpu/basic_flag.hh"
@@ -100,6 +102,9 @@ struct flags
 static constexpr word_t ROM_SIZE{0x2000};
 static constexpr word_t MEMORY_SIZE{0x4000};
 
+using in_callback_t  = std::function<byte_t(byte_t)>;
+using out_callback_t = std::function<void(byte_t,byte_t)>;
+
 /**
  * CPU
  */
@@ -148,12 +153,21 @@ public:
 	word_t sp_; ///< Stack pointer
 	byte_t int_enabled_; ///< Interrupts enabled
 
+    std::optional<in_callback_t>  in_cb;
+    std::optional<out_callback_t> out_cb;
+
 	/**
-	 * Constructor
+	 * Constructor.
 	 *
 	 * @param memory Pointer to cpu memory
+	 * @param in_callback (optional) IN callback, first parameter specifies the port
+	 * @param out_callback (optional) OUT callback, first parameter specifies the port, second is register a value
 	 */
-	cpu(byte_t* memory);
+	cpu(
+        byte_t* memory,
+        std::optional<in_callback_t>  in_callback  = std::nullopt,
+        std::optional<out_callback_t> out_callback = std::nullopt
+    );
 
 	/**
 	 * Step cpu by a single instruction.

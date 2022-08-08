@@ -506,6 +506,32 @@ struct enable_interrupt
     }
 };
 
+template<class Port>
+struct in_callback
+{
+    static
+    constexpr
+    void exec(cpu& ctx)
+    {
+        if(ctx.in_cb.has_value()) {
+            reg_a::set(ctx, ctx.in_cb.value()(Port::get(ctx)));
+        }
+    }
+};
+
+template<class Port>
+struct out_callback
+{
+    static
+    constexpr
+    void exec(cpu& ctx)
+    {
+        if(ctx.out_cb.has_value()) {
+            ctx.out_cb.value()(Port::get(ctx), reg_a::get(ctx));
+        }
+    }
+};
+
 namespace instructions
 {
 
@@ -957,12 +983,15 @@ using cmc = action_then_step<complement_carry>;
 using cma = action_then_step<complement_acc>;
 using stc = action_then_step<set_carry>;
 
-// Skip OUT and IN
-using out = step<2>;
-using in  = step<2>;
-
 using ei = action_then_step<assign<enable_interrupt, static_value<bool, true>>>;
 using di = action_then_step<assign<enable_interrupt, static_value<bool, false>>>;
+
+template<template <typename T> typename CB>
+using basic_callback =
+    chain<CB<following_data<byte_t>>, step<2>>;
+
+using in  = basic_callback<in_callback>;
+using out = basic_callback<out_callback>;
 
 #define I(T) T::exec
 
