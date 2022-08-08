@@ -13,12 +13,12 @@ option(DOXYGEN "Build doxygen documentation" OFF)
 option(MEMORY_CHECKS "Enable memory check. Automatically disabled when UNIT_TESTS are enabled" ON)
 
 if(NOT BUILD_TESTS)
-    set(UNIT_TESTS OFF)
-    set(CPUDIAG OFF)
+    set(UNIT_TESTS OFF CACHE BOOL "" FORCE)
+    set(CPUDIAG_TEST OFF CACHE BOOL "" FORCE)
 endif()
 
 if(UNIT_TESTS)
-    set(MEMORY_CHECKS OFF)
+    set(MEMORY_CHECKS OFF CACHE BOOL "" FORCE)
 endif()
 
 if(MEMORY_CHECKS)
