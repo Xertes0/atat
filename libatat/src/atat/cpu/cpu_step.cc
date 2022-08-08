@@ -9,6 +9,7 @@
 #include <array>
 #include <cstdint>
 #include <limits>
+#include <stdexcept>
 #include <tuple>
 #include <functional>
 #include <type_traits>
@@ -140,6 +141,14 @@ struct set_flags_from_value
     }
 };
 
+[[nodiscard]]
+static
+constexpr
+word_t apply_mirror(word_t loc)
+{
+    return loc & 0x3fff;
+}
+
 template<class Location, class Type>
 struct at_memory;
 
@@ -152,7 +161,7 @@ struct at_memory<Location, byte_t>
     byte_t
     get(cpu& ctx)
     {
-        return ctx.memory[Location::get(ctx)];
+        return ctx.memory[apply_mirror(Location::get(ctx))];
     }
 
     static
@@ -161,11 +170,11 @@ struct at_memory<Location, byte_t>
     set(cpu& ctx, byte_t value)
     {
         #ifdef MEMORY_CHECKS
-        if(Location::get(ctx) < ROM_SIZE) {
+        if(apply_mirror(Location::get(ctx)) < ROM_SIZE) {
             throw rom_write_exception{};
         }
         #endif
-        ctx.memory[Location::get(ctx)] = value;
+        ctx.memory[apply_mirror(Location::get(ctx))] = value;
     }
 };
 
@@ -178,7 +187,7 @@ struct at_memory<Location, word_t>
     word_t
     get(cpu& ctx)
     {
-        return (static_cast<word_t>(ctx.memory[Location::get(ctx) + 1]) << 8) | ctx.memory[Location::get(ctx)];
+        return (static_cast<word_t>(ctx.memory[apply_mirror(Location::get(ctx) + 1)]) << 8) | ctx.memory[apply_mirror(Location::get(ctx))];
     }
 
     static
@@ -187,12 +196,12 @@ struct at_memory<Location, word_t>
     set(cpu& ctx, word_t value)
     {
         #ifdef MEMORY_CHECKS
-        if(Location::get(ctx) + 1 < ROM_SIZE) {
+        if(apply_mirror(Location::get(ctx) + 1) < ROM_SIZE) {
             throw rom_write_exception{};
         }
         #endif
-        ctx.memory[Location::get(ctx) + 1] = (value >> 8) & 0xff;
-        ctx.memory[Location::get(ctx)] = value & 0xff;
+        ctx.memory[apply_mirror(Location::get(ctx) + 1)] = (value >> 8) & 0xff;
+        ctx.memory[apply_mirror(Location::get(ctx))] = value & 0xff;
     }
 };
 
