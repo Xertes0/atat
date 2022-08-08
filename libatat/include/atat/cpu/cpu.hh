@@ -98,7 +98,7 @@ struct flags
 } // namespace atat::old
 
 static constexpr word_t ROM_SIZE{0x2000};
-static constexpr word_t MEMORY_SIZE{0x3fff};
+static constexpr word_t MEMORY_SIZE{0x4000};
 
 /**
  * CPU
