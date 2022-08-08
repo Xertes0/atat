@@ -12,7 +12,7 @@ cpu::cpu(uint8_t* memory) :
     flags{},
     regs_{this},
     flags_{this},
-    int_enabled_{1} {}
+    int_enabled_{0} {}
 
 byte_t
 cpu::peek(word_t count)
