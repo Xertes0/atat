@@ -12,7 +12,7 @@ cpu::cpu(uint8_t* memory) :
     flags{},
     regs_{this},
     flags_{this},
-    int_enabled_{} {}
+    int_enabled_{1} {}
 
 byte_t
 cpu::peek(word_t count)
@@ -29,7 +29,8 @@ cpu::skip_bytes(word_t count)
 void
 cpu::generate_int(byte_t num)
 {
-    if(!int_enabled_){ return; }
+    if(int_enabled_ == 0){ return; }
+    int_enabled_ = 0;
     //assign<at_memory<apply<stack_ptr, static_value<word_t, 2>, minus>, word_t>, apply<program_counter, static_value<word_t, 3>, plus>>,
     //assign<stack_ptr, apply<stack_ptr, static_value<word_t, 2>, minus>>,
     //assign<program_counter, following_data<word_t>>
