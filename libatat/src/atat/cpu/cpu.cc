@@ -34,8 +34,10 @@ cpu::generate_int(byte_t num)
     //assign<at_memory<apply<stack_ptr, static_value<word_t, 2>, minus>, word_t>, apply<program_counter, static_value<word_t, 3>, plus>>,
     //assign<stack_ptr, apply<stack_ptr, static_value<word_t, 2>, minus>>,
     //assign<program_counter, following_data<word_t>>
-    memory[sp_ - 2] = pc_ & 0xff;
-    memory[sp_ - 1] = (pc_ >> 8) & 0xff;
+
+    // stack pointer should not point to ram mirror but just in case
+    memory[(sp_ - 2) & 0x3fff] = pc_ & 0xff;
+    memory[(sp_ - 1) & 0x3fff] = (pc_ >> 8) & 0xff;
     sp_ -= 2;
     pc_ = 8*num;
 }
