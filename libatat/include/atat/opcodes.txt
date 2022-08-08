@@ -37,7 +37,7 @@
 /* 0x24 */ I(inr_h),
 /* 0x25 */ I(dcr_h),
 /* 0x26 */ I(mvi_h),
-/* 0x27 */ I(unimpl),
+/* 0x27 */ I(nop), /* DAA as nop */
 /* 0x28 */ I(nop),
 /* 0x29 */ I(dad_h),
 /* 0x2a */ I(lhld),
