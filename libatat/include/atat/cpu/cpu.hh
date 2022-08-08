@@ -177,6 +177,15 @@ public:
     void
     skip_bytes(word_t count);
 
+    /**
+     * Generates an interrupt if they are enabled.
+     * Identical to RST num instrucion.
+     * Pushes program counter on the stack and sets it to 8*num.
+     * @param num Interrupt number
+     */
+    void
+    generate_int(byte_t num);
+
     old::regs regs_;   ///< Old registers interface for unit tests.
     old::flags flags_; ///< Old falgs interface for unit tests.
 };

@@ -26,4 +26,17 @@ cpu::skip_bytes(word_t count)
     pc_ += count;
 }
 
+void
+cpu::generate_int(byte_t num)
+{
+    if(!int_enabled_){ return; }
+    //assign<at_memory<apply<stack_ptr, static_value<word_t, 2>, minus>, word_t>, apply<program_counter, static_value<word_t, 3>, plus>>,
+    //assign<stack_ptr, apply<stack_ptr, static_value<word_t, 2>, minus>>,
+    //assign<program_counter, following_data<word_t>>
+    memory[sp_ - 2] = pc_ & 0xff;
+    memory[sp_ - 1] = (pc_ >> 8) & 0xff;
+    sp_ -= 2;
+    pc_ = 8*num;
+}
+
 } // namespace atat
