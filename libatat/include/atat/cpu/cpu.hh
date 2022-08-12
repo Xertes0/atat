@@ -20,85 +20,6 @@
 namespace atat
 {
 
-/// Old interface for unit tests
-namespace old
-{
-
-template<std::size_t N>
-struct reg
-{
-    void* ptr;
-
-    reg(void* cpu) :
-        ptr{cpu} {}
-
-    operator uint8_t() const;
-    reg<N>& operator=(uint8_t other);
-};
-
-struct regs
-{
-    void* ptr;
-
-    old::reg<0> a;
-    old::reg<1> b;
-    old::reg<2> c;
-    old::reg<3> d;
-    old::reg<4> e;
-    old::reg<5> h;
-    old::reg<6> l;
-
-    regs(void* ptr) :
-        ptr{ptr},
-        a{ptr},
-        b{ptr},
-        c{ptr},
-        d{ptr},
-        e{ptr},
-        h{ptr},
-        l{ptr} {}
-
-    uint16_t bc() const;
-    uint16_t de() const;
-    uint16_t hl() const;
-    void set_bc(uint16_t);
-    void set_de(uint16_t);
-    void set_hl(uint16_t);
-};
-
-template<std::size_t N>
-struct flag
-{
-    void* ptr;
-
-    flag(void* cpu) :
-        ptr{cpu} {}
-
-    operator uint8_t() const;
-    flag<N>& operator=(uint8_t other);
-};
-
-struct flags
-{
-    void* ptr;
-
-    old::flag<0> z;
-    old::flag<1> s;
-    old::flag<2> p;
-    old::flag<3> c;
-
-    flags(void* ptr) :
-        ptr{ptr},
-        z{ptr},
-        s{ptr},
-        p{ptr},
-        c{ptr} {}
-
-    uint8_t bits() const;
-};
-
-} // namespace atat::old
-
 static constexpr word_t ROM_SIZE{0x2000};
 static constexpr word_t MEMORY_SIZE{0x4000};
 
@@ -199,38 +120,6 @@ public:
      */
     void
     generate_int(byte_t num);
-
-    old::regs regs_;   ///< Old registers interface for unit tests.
-    old::flags flags_; ///< Old falgs interface for unit tests.
 };
-
-namespace old
-{
-
-template<std::size_t N>
-reg<N>::operator uint8_t() const
-{
-    return reinterpret_cast<cpu*>(ptr)->registers[N].value;
-}
-
-template<std::size_t N>
-reg<N>& reg<N>::operator=(uint8_t other)
-{
-    reinterpret_cast<cpu*>(ptr)->registers[N].value = other;
-}
-
-template<std::size_t N>
-flag<N>::operator uint8_t() const
-{
-    return reinterpret_cast<cpu*>(ptr)->flags[N].value;
-}
-
-template<std::size_t N>
-flag<N>& flag<N>::operator=(uint8_t other)
-{
-    reinterpret_cast<cpu*>(ptr)->flags[N].value = other;
-}
-
-} // namespace atat::old
 
 } // namespace atat

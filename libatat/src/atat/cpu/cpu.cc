@@ -14,8 +14,6 @@ cpu::cpu(
     pc{},
     memory{memory},
     flags{},
-    regs_{this},
-    flags_{this},
     int_enabled{0},
     in_cb{in_callback},
     out_cb{out_callback} {}
