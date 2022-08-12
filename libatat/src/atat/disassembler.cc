@@ -1,7 +1,6 @@
 #include "atat/disassembler.hh"
 
 #include <fstream>
-#include <iostream>
 #include <stdexcept>
 
 namespace atat
@@ -11,10 +10,8 @@ std::vector<byte_t>
 memory_with_rom(std::string_view path, word_t offset)
 {
 	std::ifstream file{path.data(), std::ios::binary};
-	std::cout << "Opening: \"" << path << "\"\n";
 	if(!file.good()) {
-		std::cerr << "Failed to open file\n";
-		exit(1);
+    throw std::runtime_error{"Could not open the file"};
 	}
 
 	file.seekg(0, std::ios::end);
