@@ -17,7 +17,7 @@ TEST(OpcodesTest, JCR_JMP)
     auto cpu = atat::cpu{memory};
 
     cpu.step();
-    EXPECT_EQ(cpu.pc_, 0xabcd);
+    EXPECT_EQ(cpu.pc, 0xabcd);
 }
 
 TEST(OpcodesTest, JCR_JNZ)
@@ -35,11 +35,11 @@ TEST(OpcodesTest, JCR_JNZ)
 
     cpu.flags_.z = 1;
     cpu.step();
-    EXPECT_EQ(cpu.pc_, 3);
+    EXPECT_EQ(cpu.pc, 3);
 
     cpu.flags_.z = 0;
     cpu.step();
-    EXPECT_EQ(cpu.pc_, 0xabcd);
+    EXPECT_EQ(cpu.pc, 0xabcd);
 }
 
 TEST(OpcodesTest, JCR_JZ)
@@ -57,11 +57,11 @@ TEST(OpcodesTest, JCR_JZ)
 
     cpu.flags_.z = 0;
     cpu.step();
-    EXPECT_EQ(cpu.pc_, 3);
+    EXPECT_EQ(cpu.pc, 3);
 
     cpu.flags_.z = 1;
     cpu.step();
-    EXPECT_EQ(cpu.pc_, 0xabcd);
+    EXPECT_EQ(cpu.pc, 0xabcd);
 }
 
 TEST(OpcodesTest, JCR_JNC)
@@ -79,11 +79,11 @@ TEST(OpcodesTest, JCR_JNC)
 
     cpu.flags_.c = 1;
     cpu.step();
-    EXPECT_NE(cpu.pc_, 0xabcd);
+    EXPECT_NE(cpu.pc, 0xabcd);
 
     cpu.flags_.c = 0;
     cpu.step();
-    EXPECT_EQ(cpu.pc_, 0xabcd);
+    EXPECT_EQ(cpu.pc, 0xabcd);
 }
 
 TEST(OpcodesTest, JCR_JC)
@@ -101,11 +101,11 @@ TEST(OpcodesTest, JCR_JC)
 
     cpu.flags_.c = 0;
     cpu.step();
-    EXPECT_NE(cpu.pc_, 0xabcd);
+    EXPECT_NE(cpu.pc, 0xabcd);
 
     cpu.flags_.c = 1;
     cpu.step();
-    EXPECT_EQ(cpu.pc_, 0xabcd);
+    EXPECT_EQ(cpu.pc, 0xabcd);
 }
 
 TEST(OpcodesTest, JCR_JPO)
@@ -123,11 +123,11 @@ TEST(OpcodesTest, JCR_JPO)
 
     cpu.flags_.p = 1;
     cpu.step();
-    EXPECT_NE(cpu.pc_, 0xabcd);
+    EXPECT_NE(cpu.pc, 0xabcd);
 
     cpu.flags_.p = 0;
     cpu.step();
-    EXPECT_EQ(cpu.pc_, 0xabcd);
+    EXPECT_EQ(cpu.pc, 0xabcd);
 }
 
 TEST(OpcodesTest, JCR_JPE)
@@ -145,11 +145,11 @@ TEST(OpcodesTest, JCR_JPE)
 
     cpu.flags_.p = 0;
     cpu.step();
-    EXPECT_NE(cpu.pc_, 0xabcd);
+    EXPECT_NE(cpu.pc, 0xabcd);
 
     cpu.flags_.p = 1;
     cpu.step();
-    EXPECT_EQ(cpu.pc_, 0xabcd);
+    EXPECT_EQ(cpu.pc, 0xabcd);
 }
 
 TEST(OpcodesTest, JCR_JP)
@@ -167,11 +167,11 @@ TEST(OpcodesTest, JCR_JP)
 
     cpu.flags_.s = 1;
     cpu.step();
-    EXPECT_NE(cpu.pc_, 0xabcd);
+    EXPECT_NE(cpu.pc, 0xabcd);
 
     cpu.flags_.s = 0;
     cpu.step();
-    EXPECT_EQ(cpu.pc_, 0xabcd);
+    EXPECT_EQ(cpu.pc, 0xabcd);
 }
 
 TEST(OpcodesTest, JCR_JM)
@@ -189,11 +189,11 @@ TEST(OpcodesTest, JCR_JM)
 
     cpu.flags_.s = 0;
     cpu.step();
-    EXPECT_NE(cpu.pc_, 0xabcd);
+    EXPECT_NE(cpu.pc, 0xabcd);
 
     cpu.flags_.s = 1;
     cpu.step();
-    EXPECT_EQ(cpu.pc_, 0xabcd);
+    EXPECT_EQ(cpu.pc, 0xabcd);
 }
 
 TEST(OpcodesTest, JCR_CALL)
@@ -214,10 +214,10 @@ TEST(OpcodesTest, JCR_CALL)
     cpu.step();
 
     cpu.step();
-    EXPECT_EQ(cpu.pc_, 0xabcd);
+    EXPECT_EQ(cpu.pc, 0xabcd);
     EXPECT_EQ(memory[4], 4);
     EXPECT_EQ(memory[5], 0);
-    EXPECT_EQ(cpu.sp_, 4);
+    EXPECT_EQ(cpu.sp, 4);
 }
 
 // Depends on working CALL
@@ -243,6 +243,6 @@ TEST(OpcodesTest, JCR_RET)
     cpu.step();
     cpu.step();
 
-    EXPECT_EQ(cpu.pc_, 4);
-    EXPECT_EQ(cpu.sp_, 9);
+    EXPECT_EQ(cpu.pc, 4);
+    EXPECT_EQ(cpu.sp, 9);
 }

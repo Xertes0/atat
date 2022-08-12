@@ -20,7 +20,7 @@ TEST(OpcodesTest, Transfer_LDA)
 
     cpu.step();
     EXPECT_EQ(cpu.regs_.a, 0xef);
-    EXPECT_EQ(cpu.pc_, 3);
+    EXPECT_EQ(cpu.pc, 3);
 }
 
 TEST(OpcodesTest, Transfer_STA)
@@ -37,7 +37,7 @@ TEST(OpcodesTest, Transfer_STA)
     cpu.regs_.a = 23;
     cpu.step();
     EXPECT_EQ(memory[3], 23);
-    EXPECT_EQ(cpu.pc_, 3);
+    EXPECT_EQ(cpu.pc, 3);
 }
 
 TEST(OpcodesTest, Transfer_LDAX_B)
@@ -119,7 +119,7 @@ TEST(OpcodesTest, Transfer_LHLD)
     cpu.step();
     EXPECT_EQ(cpu.regs_.l, 0x8a);
     EXPECT_EQ(cpu.regs_.h, 0x23);
-    EXPECT_EQ(cpu.pc_, 3);
+    EXPECT_EQ(cpu.pc, 3);
 }
 
 TEST(OpcodesTest, Transfer_SHLD)
@@ -139,7 +139,7 @@ TEST(OpcodesTest, Transfer_SHLD)
     cpu.step();
     EXPECT_EQ(memory[3], 0x8a);
     EXPECT_EQ(memory[4], 0x23);
-    EXPECT_EQ(cpu.pc_, 3);
+    EXPECT_EQ(cpu.pc, 3);
 }
 
 #define LXI(A,B) \
@@ -169,7 +169,7 @@ TEST(OpcodesTest, Transfer_LXI_sp)
     };
     auto cpu = atat::cpu{memory};
     cpu.step();
-    EXPECT_EQ(cpu.sp_, 0x28cf);
+    EXPECT_EQ(cpu.sp, 0x28cf);
 }
 
 TEST(OpcodesTest, Transfer_PCHL)
@@ -182,7 +182,7 @@ TEST(OpcodesTest, Transfer_PCHL)
 
     cpu.regs_.set_hl(0xf4e5);
     cpu.step();
-    EXPECT_EQ(cpu.pc_, 0xf4e5);
+    EXPECT_EQ(cpu.pc, 0xf4e5);
 }
 
 TEST(OpcodesTest, Transfer_XCHG)

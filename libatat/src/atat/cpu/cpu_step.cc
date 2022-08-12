@@ -212,7 +212,7 @@ struct step
     constexpr
     void exec(cpu& ctx)
     {
-        ctx.pc_ += N;
+        ctx.pc += N;
     }
 };
 
@@ -241,7 +241,7 @@ struct following_data<byte_t>
     constexpr
     byte_t get(cpu& ctx)
     {
-        return ctx.memory[ctx.pc_ + 1];
+        return ctx.memory[ctx.pc + 1];
     }
 };
 
@@ -253,7 +253,7 @@ struct following_data<word_t>
     constexpr
     word_t get(cpu& ctx)
     {
-        return (static_cast<word_t>(ctx.memory[ctx.pc_ + 2]) << 8) | ctx.memory[ctx.pc_ + 1];
+        return (static_cast<word_t>(ctx.memory[ctx.pc + 2]) << 8) | ctx.memory[ctx.pc + 1];
     }
 };
 
@@ -264,14 +264,14 @@ struct stack_ptr
     constexpr
     word_t get(cpu& ctx)
     {
-        return ctx.sp_;
+        return ctx.sp;
     }
 
     static
     constexpr
     void set(cpu& ctx, word_t value)
     {
-        ctx.sp_ = value;
+        ctx.sp = value;
     }
 };
 
@@ -302,14 +302,14 @@ struct program_counter
     constexpr
     word_t get(cpu& ctx)
     {
-        return ctx.pc_;
+        return ctx.pc;
     }
 
     static
     constexpr
     void set(cpu& ctx, word_t value)
     {
-        ctx.pc_ = value;
+        ctx.pc = value;
     }
 };
 
@@ -502,7 +502,7 @@ struct enable_interrupt
     constexpr
     void set(cpu& ctx, bool value)
     {
-        ctx.int_enabled_ = value;
+        ctx.int_enabled = value;
     }
 };
 
@@ -1009,7 +1009,7 @@ std::array<std::function<void(cpu&)>, 0x100> table
 void
 cpu::step()
 {
-    uint8_t op = memory[pc_];
+    uint8_t op = memory[pc];
 
     instructions::table[op](*this);
 }

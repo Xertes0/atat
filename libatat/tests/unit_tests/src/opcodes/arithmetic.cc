@@ -468,7 +468,7 @@ TEST(OpcodesTest, Arithmetic_ADI)
     memory[1]   = 23;
     cpu.step();
     EXPECT_EQ(cpu.regs_.a, 57);
-    EXPECT_EQ(cpu.pc_, 2);
+    EXPECT_EQ(cpu.pc, 2);
 }
 
 TEST(OpcodesTest, Arithmetic_SUI)
@@ -484,7 +484,7 @@ TEST(OpcodesTest, Arithmetic_SUI)
     memory[1]   = 23;
     cpu.step();
     EXPECT_EQ(cpu.regs_.a, 11);
-    EXPECT_EQ(cpu.pc_, 2);
+    EXPECT_EQ(cpu.pc, 2);
 }
 
 TEST(OpcodesTest, Arithmetic_CPI)
@@ -503,14 +503,14 @@ TEST(OpcodesTest, Arithmetic_CPI)
     cpu.step();
     EXPECT_EQ(cpu.regs_.a,  34);
     EXPECT_EQ(cpu.flags_.z, 1);
-    EXPECT_EQ(cpu.pc_, 2);
+    EXPECT_EQ(cpu.pc, 2);
 
     cpu.regs_.a = 23;
     memory[3]   = 50;
     cpu.step();
     EXPECT_EQ(cpu.regs_.a,  23);
     EXPECT_EQ(cpu.flags_.z, 0);
-    EXPECT_EQ(cpu.pc_, 4);
+    EXPECT_EQ(cpu.pc, 4);
 }
 
 TEST(OpcodesTest, Arithmetic_ANI)
@@ -526,7 +526,7 @@ TEST(OpcodesTest, Arithmetic_ANI)
     memory[1]   = 0b11001;
     cpu.step();
     EXPECT_EQ(cpu.regs_.a,  0b10001);
-    EXPECT_EQ(cpu.pc_, 2);
+    EXPECT_EQ(cpu.pc, 2);
 }
 
 TEST(OpcodesTest, Arithmetic_ORI)
@@ -542,7 +542,7 @@ TEST(OpcodesTest, Arithmetic_ORI)
     memory[1]   = 0b11001;
     cpu.step();
     EXPECT_EQ(cpu.regs_.a,  0b11011);
-    EXPECT_EQ(cpu.pc_, 2);
+    EXPECT_EQ(cpu.pc, 2);
 }
 
 TEST(OpcodesTest, Arithmetic_XRI)
@@ -558,7 +558,7 @@ TEST(OpcodesTest, Arithmetic_XRI)
     memory[1]   = 0b11001;
     cpu.step();
     EXPECT_EQ(cpu.regs_.a,  0b01010);
-    EXPECT_EQ(cpu.pc_, 2);
+    EXPECT_EQ(cpu.pc, 2);
 }
 
 TEST(OpcodesTest, Arithmetic_ADC)
@@ -890,7 +890,7 @@ TEST(OpcodesTest, Arithmetic_DAD)
 
     cpu.regs_.h = 0b00000011;
     cpu.regs_.l =         0b00001011;
-    cpu.sp_     = 0b0010000000000101;
+    cpu.sp     = 0b0010000000000101;
     cpu.step();
     EXPECT_EQ(cpu.regs_.h, 0b00100011);
     EXPECT_EQ(cpu.regs_.l, 0b00010000);
@@ -925,9 +925,9 @@ TEST(OpcodesTest, Arithmetic_INX)
     EXPECT_EQ(cpu.regs_.h, 0x13);
     EXPECT_EQ(cpu.regs_.l, 0);
 
-    cpu.sp_ = 1234;
+    cpu.sp = 1234;
     cpu.step();
-    EXPECT_EQ(cpu.sp_, 1235);
+    EXPECT_EQ(cpu.sp, 1235);
 }
 
 TEST(OpcodesTest, Arithmetic_DCX)
@@ -959,7 +959,7 @@ TEST(OpcodesTest, Arithmetic_DCX)
     EXPECT_EQ(cpu.regs_.h, 0x12);
     EXPECT_EQ(cpu.regs_.l, 0xfe);
 
-    cpu.sp_ = 1234;
+    cpu.sp = 1234;
     cpu.step();
-    EXPECT_EQ(cpu.sp_, 1233);
+    EXPECT_EQ(cpu.sp, 1233);
 }

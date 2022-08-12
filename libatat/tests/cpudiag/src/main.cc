@@ -31,7 +31,7 @@ int main(int argc, char const** argv)
 
     atat::cpu cpu{memory.data()};
     while(true) {
-        history.push_back(cpu.pc_);
+        history.push_back(cpu.pc);
         auto next{cpu.peek()};
         if(next == atat::opcodes::hlt) {
             break;

@@ -18,7 +18,7 @@ TEST(OpcodesTest, Stack_SPHL)
     cpu.regs_.h = 0xab;
     cpu.regs_.l = 0xcd;
     cpu.step();
-    EXPECT_EQ(cpu.sp_, 0xabcd);
+    EXPECT_EQ(cpu.sp, 0xabcd);
 }
 
 // Depends on working SPHL
@@ -56,12 +56,12 @@ TEST(OpcodesTest, Stack_XTHL)
             0 \
         }; \
         auto cpu = atat::cpu{memory}; \
-        cpu.sp_ = 3; \
+        cpu.sp = 3; \
         cpu.regs_.set_##A##B(0x1f27); \
         cpu.step(); \
         EXPECT_EQ(memory[1], 0x27); \
         EXPECT_EQ(memory[2], 0x1f); \
-        EXPECT_EQ(cpu.sp_, 1); \
+        EXPECT_EQ(cpu.sp, 1); \
     }
 
 
@@ -74,10 +74,10 @@ TEST(OpcodesTest, Stack_XTHL)
             0x1f \
         }; \
         auto cpu = atat::cpu{memory}; \
-        cpu.sp_ = 1; \
+        cpu.sp = 1; \
         cpu.step(); \
         EXPECT_EQ(cpu.regs_.A##B(), 0x1f27); \
-        EXPECT_EQ(cpu.sp_, 3); \
+        EXPECT_EQ(cpu.sp, 3); \
     }
 
 PUSH(b, c)
@@ -93,7 +93,7 @@ TEST(OpcodesTest, Stack_PUSH_PSW)
     };
 
     auto cpu = atat::cpu{memory};
-    cpu.sp_ = 3;
+    cpu.sp = 3;
 
     cpu.flags_.s = 1;
     cpu.flags_.z = 0;
@@ -103,7 +103,7 @@ TEST(OpcodesTest, Stack_PUSH_PSW)
     cpu.step();
     EXPECT_EQ(memory[1], 0b10000110);
     EXPECT_EQ(memory[2], 0x1f);
-    EXPECT_EQ(cpu.sp_, 1);
+    EXPECT_EQ(cpu.sp, 1);
 }
 
 POP(b, c)
@@ -119,10 +119,10 @@ TEST(OpcodesTest, Stack_POP_PSW)
     };
 
     auto cpu = atat::cpu{memory};
-    cpu.sp_ = 1;
+    cpu.sp = 1;
 
     cpu.step();
     EXPECT_EQ(cpu.flags_.bits(), 0b10000110);
     EXPECT_EQ(cpu.regs_.a, 0x1f);
-    EXPECT_EQ(cpu.sp_, 3);
+    EXPECT_EQ(cpu.sp, 3);
 }

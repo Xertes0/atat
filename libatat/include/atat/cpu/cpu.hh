@@ -149,9 +149,9 @@ public:
     byte_t* memory;
 
     word_t step_tmp; ///< Used in cpu_step.cc
-    word_t pc_; ///< Program counter
-	word_t sp_; ///< Stack pointer
-	byte_t int_enabled_; ///< Interrupts enabled
+    word_t pc; ///< Program counter
+	word_t sp; ///< Stack pointer
+	byte_t int_enabled; ///< Interrupts enabled
 
     std::optional<in_callback_t>  in_cb;
     std::optional<out_callback_t> out_cb;
