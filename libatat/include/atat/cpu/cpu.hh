@@ -71,30 +71,30 @@ public:
 
     word_t step_tmp; ///< Used in cpu_step.cc
     word_t pc; ///< Program counter
-	word_t sp; ///< Stack pointer
-	byte_t int_enabled; ///< Interrupts enabled
+    word_t sp; ///< Stack pointer
+    byte_t int_enabled; ///< Interrupts enabled
 
     std::optional<in_callback_t>  in_cb;
     std::optional<out_callback_t> out_cb;
 
-	/**
-	 * Constructor.
-	 *
-	 * @param memory Pointer to cpu memory
-	 * @param in_callback (optional) IN callback, first parameter specifies the port
-	 * @param out_callback (optional) OUT callback, first parameter specifies the port, second is register a value
-	 */
-	cpu(
+    /**
+     * Constructor.
+     *
+     * @param memory Pointer to cpu memory
+     * @param in_callback (optional) IN callback, first parameter specifies the port
+     * @param out_callback (optional) OUT callback, first parameter specifies the port, second is register a value
+     */
+    cpu(
         byte_t* memory,
         std::optional<in_callback_t>  in_callback  = std::nullopt,
         std::optional<out_callback_t> out_callback = std::nullopt
     );
 
-	/**
-	 * Step cpu by a single instruction.
-	 */
-	void
-	step();
+    /**
+     * Step cpu by a single instruction.
+     */
+    void
+    step();
 
     /**
      * Return the next instruction to be executed or next count bytes.
